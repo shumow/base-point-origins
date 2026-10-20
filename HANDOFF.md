@@ -75,7 +75,8 @@ For base …9c60 + i, i = 0…15, on each secp\*k1 curve, which i give a point, 
 
 ## 4. What to do next (priority order)
 
-### 4.1 Certicom-era dictionary pass — the obvious next experiment
+### 4.1 Certicom-era dictionary pass — first pass run 20 Oct
+*Result:* `wordlists/certicom.txt` (6,939 base strings) through `scripts/wordlist_search.py` — every variant, three encodings, 13 suffixes, SHA-1/SHA-0/RIPEMD-160/SHA-1∘SHA-1/SHA-1∘MD5 against the core and MD5/MD4/RIPEMD-128 against K-163: **no hit** (`results/certicom-wordlist-search.txt`). The list below is what went in; widen it (full English wordlists, name lists, hashcat rules) on a GPU per `notes/hash-angle.md` V1.
 Extend `scripts/k163/strings.py` (or write `strings_certicom.py`) and rerun `secg_core_search.py` (and the K-163 search). Add: Certicom, Certicom Corp, Certicom Research, SECG, SEC 1, SEC 2, "Standards for Efficient Cryptography", Mississauga, Waterloo, Hayward; people: Scott Vanstone, Alfred Menezes, Minghua Qu, Dan Brown, Daniel R. L. Brown, Rob Gallant, Robert Gallant, Rob Lambert, Robert Lambert, Simon Blake-Wilson, Don Johnson, Ron Mullin, Ian Blake, Neal Koblitz; curve names: secp160k1 … secp256k1, sec160k1, ansip256k1, "Koblitz 256", "k256", "koblitz", "anomalous", "CM curve", "j=0"; the SEC 1/2 draft dates (1999–2000, and 1998 for the Certicom ECC Challenge); the ECC Challenge names (ECCp-131, ECC2K-163, …) — Certicom's challenge curves of 1997 are a plausible source of a reused constant; the r-curve SEEDs and their ASCII; and the obvious test strings ("test", "abc", "hello", "The quick brown fox…", "Certicom test vector"). Also try hashing the *other* curves' parameters: p, n, a, b of each secp\*k1 curve as decimal/hex strings — a program that seeded the generator search from the curve's own parameters would produce a value shared only if the input was shared, so this tests the hypothesis more than it finds the answer.
 
 ### 4.2 Explain the top byte and the 192k1 prefix
