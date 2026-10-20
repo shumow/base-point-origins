@@ -19,6 +19,7 @@ The secp\*k1 observation was first made in the Heninger–Scholl–Shumow Crypto
 
 | | |
 |---|---|
+| [`HANDOFF.md`](HANDOFF.md) | **start here** — everything known, everything tried, what to do next |
 | [`notes/plan.md`](notes/plan.md) | the hypotheses and the six-step search plan, with the steps already run marked |
 | [`notes/record.md`](notes/record.md) | the full record of what has been computed so far (small-multiple scans, K-163, the SEC 2 curves) |
 | [`notes/base-point-brief.md`](notes/base-point-brief.md) | the earlier hand-off brief |
