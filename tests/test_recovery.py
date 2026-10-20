@@ -147,6 +147,14 @@ class TestMakeTargets(unittest.TestCase):
             k = Path(d, "k163_md5.txt").read_text().split()
             self.assertIn("23e21d6019e1211f6bd47ec180256e97", k); self.assertEqual(len(k), 4)
 
+    def test_planted_controls_are_appended(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as d:
+            subprocess.run([sys.executable, str(ROOT / "scripts" / "make_targets.py"), d, "--plant", "Certicom", "Certicom1"], check=True, capture_output=True)
+            t = Path(d, "secp_core_sha1.txt").read_text().split(); k = Path(d, "k163_md5.txt").read_text().split()
+            self.assertEqual(len(t), 12290); self.assertEqual(len(k), 6)
+            self.assertIn(hashlib.sha1(b"Certicom1").hexdigest(), t); self.assertIn(hashlib.md5(b"Certicom").hexdigest(), k)
+
 
 class TestFreelipSweep(unittest.TestCase):
     P192 = dict(p=2**192 - 2**64 - 1, a=-3, b=0x64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1,
