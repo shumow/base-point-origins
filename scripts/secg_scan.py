@@ -47,48 +47,52 @@ class C:
             P = s.add(P, P); k >>= 1
         return R
 
-K, KD = 2**16, 2**12
-out = {}
-for name, d in CURVES.items():
-    c = C(d); p, n, h = c.p, c.n, c.h; m = p.bit_length(); G = (c.Gx, c.Gy)
-    assert c.on(G), name; assert c.mul(n, G) is None, name
-    # order of the full group is h*n; check with a random-ish point? skip; n*G = O suffices for the subgroup.
-    thr = m - 32; bestx = (m + 1, ""); besty = (m + 1, ""); found = []
-    def rec(P, lab):
-        global bestx, besty
-        x, y = P; bx = x.bit_length(); by = min(y, p - y).bit_length()
-        if bx < bestx[0]: bestx = (bx, lab)
-        if by < besty[0]: besty = (by, lab)
-        if bx <= thr or by <= thr: found.append(f"{lab}: x {bx} bits, y {by} bits, x={x:x}")
-    Q = G
-    for k in range(2, K + 1):
-        Q = c.add(Q, G); rec(Q, f"{k}*G")
-    for k in range(2, KD + 1):
-        rec(c.mul(pow(k, -1, n), G), f"G/{k}")
-    half = c.mul((n + 1) // 2, G)
-    pre = []
-    if h > 1:
-        # cofactor preimages: Q + T for T in E[h]; find a point of order h by h-th roots... use x-search: points P with n*P != O and n*h*P==O.
-        # For h = 4: full group order 4n; find T of order dividing 4 as (hn/4)... simpler: scan small x for a point, multiply by n to land in E[h].
-        Qh = c.mul(pow(h, -1, n), G); tors = set()
-        x = 0
-        while len(tors) < h and x < 5000:
-            rhs = (x**3 + c.a * x + c.b) % p
-            if p % 4 == 3:
-                y = pow(rhs, (p + 1) // 4, p)
-                if y * y % p == rhs:
-                    T = c.mul(n, (x, y)); R = T
-                    for _ in range(h):
-                        tors.add(R); R = c.add(R, T)
-                        if R is None: break
-            x += 1
-        tors = [t for t in tors if t is None or c.mul(h, t) is None]
-        for T in set(tors):
-            R = c.add(Qh, T) if T is not None else Qh
-            assert c.mul(h, R) == G
-            pre.append((R[0].bit_length(), f"{R[0]:x}"))
-    out[name] = dict(bits=m, h=h, half_x_bits=half[0].bit_length(), half_x=f"{half[0]:x}", shortest_x=bestx, shortest_y=besty,
-                     found=found, cofactor_preimage_x_bits=sorted(b for b, _ in pre), rough_expected_min=m - 17)
-    print(name, "m=%d h=%d  G/2 x: %d bits  shortest x: %d at %s  shortest y: %d at %s  found: %s  preimages: %s" %
-          (m, h, half[0].bit_length(), bestx[0], bestx[1], besty[0], besty[1], found or "none", sorted(b for b, _ in pre)), flush=True)
-json.dump(out, open("secg_scan.json", "w"), indent=1)
+def main():
+    K, KD = 2**16, 2**12
+    out = {}
+    for name, d in CURVES.items():
+        c = C(d); p, n, h = c.p, c.n, c.h; m = p.bit_length(); G = (c.Gx, c.Gy)
+        assert c.on(G), name; assert c.mul(n, G) is None, name
+        # order of the full group is h*n; check with a random-ish point? skip; n*G = O suffices for the subgroup.
+        thr = m - 32; bestx = (m + 1, ""); besty = (m + 1, ""); found = []
+        def rec(P, lab):
+            nonlocal bestx, besty
+            x, y = P; bx = x.bit_length(); by = min(y, p - y).bit_length()
+            if bx < bestx[0]: bestx = (bx, lab)
+            if by < besty[0]: besty = (by, lab)
+            if bx <= thr or by <= thr: found.append(f"{lab}: x {bx} bits, y {by} bits, x={x:x}")
+        Q = G
+        for k in range(2, K + 1):
+            Q = c.add(Q, G); rec(Q, f"{k}*G")
+        for k in range(2, KD + 1):
+            rec(c.mul(pow(k, -1, n), G), f"G/{k}")
+        half = c.mul((n + 1) // 2, G)
+        pre = []
+        if h > 1:
+            # cofactor preimages: Q + T for T in E[h]; find a point of order h by h-th roots... use x-search: points P with n*P != O and n*h*P==O.
+            # For h = 4: full group order 4n; find T of order dividing 4 as (hn/4)... simpler: scan small x for a point, multiply by n to land in E[h].
+            Qh = c.mul(pow(h, -1, n), G); tors = set()
+            x = 0
+            while len(tors) < h and x < 5000:
+                rhs = (x**3 + c.a * x + c.b) % p
+                if p % 4 == 3:
+                    y = pow(rhs, (p + 1) // 4, p)
+                    if y * y % p == rhs:
+                        T = c.mul(n, (x, y)); R = T
+                        for _ in range(h):
+                            tors.add(R); R = c.add(R, T)
+                            if R is None: break
+                x += 1
+            tors = [t for t in tors if t is None or c.mul(h, t) is None]
+            for T in set(tors):
+                R = c.add(Qh, T) if T is not None else Qh
+                assert c.mul(h, R) == G
+                pre.append((R[0].bit_length(), f"{R[0]:x}"))
+        out[name] = dict(bits=m, h=h, half_x_bits=half[0].bit_length(), half_x=f"{half[0]:x}", shortest_x=bestx, shortest_y=besty,
+                         found=found, cofactor_preimage_x_bits=sorted(b for b, _ in pre), rough_expected_min=m - 17)
+        print(name, "m=%d h=%d  G/2 x: %d bits  shortest x: %d at %s  shortest y: %d at %s  found: %s  preimages: %s" %
+              (m, h, half[0].bit_length(), bestx[0], bestx[1], besty[0], besty[1], found or "none", sorted(b for b, _ in pre)), flush=True)
+    json.dump(out, open("secg_scan.json", "w"), indent=1)
+
+if __name__ == "__main__":
+    main()

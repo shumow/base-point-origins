@@ -1,7 +1,8 @@
 """Hash every candidate string with every 1990s hash and compare against the K-163 half-point x in several readings."""
 import hashlib, sys
 from hashes import md4, sha0, ripemd128
-from strings import all_strings
+import importlib, os
+all_strings = importlib.import_module(os.environ.get("STRINGS", "strings")).all_strings   # STRINGS=strings_certicom for the §4.1 set
 
 TARGET = bytes.fromhex("23e21d6019e1211f6bd47ec180256e97")
 T_INT = int.from_bytes(TARGET, "big")

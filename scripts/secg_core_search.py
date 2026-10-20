@@ -7,7 +7,8 @@ import hashlib, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent / "k163"))
 from hashes import sha0
-from strings import all_strings
+import importlib, os
+all_strings = importlib.import_module(os.environ.get("STRINGS", "strings")).all_strings   # STRINGS=strings_certicom for the §4.1 set
 
 CORE = 0xce563f89a0ed9414f5aa28ad0d96d6795f9c6          # bits 4..151 of every secp*k1 half x
 MASK = (1 << 148) - 1

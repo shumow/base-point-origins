@@ -70,16 +70,21 @@ First 92 bits shared (`4a96b5688ef573284664698`), remaining 68 differ wholesale 
 ### 3.2 Core-matched dictionary for the secp constant (16,432,065 evaluations, 0 hits)
 `scripts/secg_core_search.py`: same string set; SHA-1, SHA-0, RIPEMD-160, SHA-1∘SHA-1, SHA-1∘MD5; same suffixes; readings as-is / reversed / word-swapped; **matcher compares bits 4–151 only** against the core, so the varying top byte and last nibble cannot hide a hit; also checks the full 160-bit values with top byte 48 or 78. Result: `results/secg-core-search.txt`. Caveat: this string set was built for the NSA/NIST story. It does not contain Certicom-specific material (see §4.1).
 
-### 3.3 Last-nibble acceptance rule (negative)
-For base …9c60 + i, i = 0…15, on each secp\*k1 curve, which i give a point, and the parity / half-plane of y(P) (`notes/plan.md` step 2 has the table). The used P has even y above p/2 on all four — but "first x on the curve" picks 0, 0, 2, 1, and "first x whose even root is above p/2" picks 0 on secp192k1. So neither parity nor y < p/2 nor plain on-curve explains 2, 6, 3, 3. Open.
+### 3.3 Certicom-era dictionary pass (§4.1, done 20 Oct, second session; 0 hits)
+`scripts/k163/strings_certicom.py` (271,395 byte strings: Certicom/SECG/SEC/WTLS/P1363 names and places, the Certicom people, every spelling of the six secp curves and the Koblitz/CM/j=0 vocabulary, the 1997 ECC Challenge names, the r-curve SEEDs and "Minghua Qu", hash test strings, 1999–2000 dates, and every curve parameter as decimal/hex/raw bytes). Both harnesses take `STRINGS=strings_certicom`. secp core: 17,640,675 evaluations, 0 hits (`results/secg-core-search-certicom.txt`). K-163: 31,753,215 evaluations, 0 hits (`results/k163-search-certicom.txt`). Both dictionaries (NIST-centred and Certicom-centred) are now exhausted under every 1990s hash; a bare hash of a short human string is unlikely for either constant.
+
+### 3.4 Last-nibble acceptance rule (negative, now brute-forced)
+For base …9c60 + i, i = 0…15, on each secp\*k1 curve, which i give a point, and the parity / half-plane of y(P) (`notes/plan.md` step 2 has the table). The used P has even y above p/2 on all four — but "first x on the curve" picks 0, 0, 2, 1, and "first x whose even root is above p/2" picks 0 on secp192k1. So neither parity nor y < p/2 nor plain on-curve explains 2, 6, 3, 3. `scripts/nibble_rules.py` then tried ~11,500 rules (every start nibble in −16…15, both directions, 1st/2nd/3rd hit, ~60 point properties and all pairs): 13 fit, which is the chance rate. Most code-like survivor: "second on-curve x at or after …9c61". Treat as open; record §7.3.3.
 
 ## 4. What to do next (priority order)
 
-### 4.1 Certicom-era dictionary pass — first pass run 20 Oct
-*Result:* `wordlists/certicom.txt` (6,939 base strings) through `scripts/wordlist_search.py` — every variant, three encodings, 13 suffixes, SHA-1/SHA-0/RIPEMD-160/SHA-1∘SHA-1/SHA-1∘MD5 against the core and MD5/MD4/RIPEMD-128 against K-163: **no hit** (`results/certicom-wordlist-search.txt`). The list below is what went in; widen it (full English wordlists, name lists, hashcat rules) on a GPU per `notes/hash-angle.md` V1.
+### 4.1 Certicom-era dictionary pass — run twice on 20 Oct by two independent sessions, no hit either time
+*Result A:* `wordlists/certicom.txt` (6,939 base strings) through `scripts/wordlist_search.py` — every variant, three encodings, 13 suffixes, SHA-1/SHA-0/RIPEMD-160/SHA-1∘SHA-1/SHA-1∘MD5 against the core and MD5/MD4/RIPEMD-128 against K-163: **no hit** (`results/certicom-wordlist-search.txt`, 19.4 M evaluations).
+*Result B:* `scripts/k163/strings_certicom.py` (271,395 byte strings incl. the curve parameters as decimal/hex/raw bytes) through the original harnesses with `STRINGS=strings_certicom`: core 17.6 M evaluations, K-163 31.8 M, **no hit** (§3.3; `results/*-certicom.txt`). The list below is what went in; widen it (full English wordlists, name lists, hashcat rules) on a GPU per `notes/hash-angle.md` V1.
 Extend `scripts/k163/strings.py` (or write `strings_certicom.py`) and rerun `secg_core_search.py` (and the K-163 search). Add: Certicom, Certicom Corp, Certicom Research, SECG, SEC 1, SEC 2, "Standards for Efficient Cryptography", Mississauga, Waterloo, Hayward; people: Scott Vanstone, Alfred Menezes, Minghua Qu, Dan Brown, Daniel R. L. Brown, Rob Gallant, Robert Gallant, Rob Lambert, Robert Lambert, Simon Blake-Wilson, Don Johnson, Ron Mullin, Ian Blake, Neal Koblitz; curve names: secp160k1 … secp256k1, sec160k1, ansip256k1, "Koblitz 256", "k256", "koblitz", "anomalous", "CM curve", "j=0"; the SEC 1/2 draft dates (1999–2000, and 1998 for the Certicom ECC Challenge); the ECC Challenge names (ECCp-131, ECC2K-163, …) — Certicom's challenge curves of 1997 are a plausible source of a reused constant; the r-curve SEEDs and their ASCII; and the obvious test strings ("test", "abc", "hello", "The quick brown fox…", "Certicom test vector"). Also try hashing the *other* curves' parameters: p, n, a, b of each secp\*k1 curve as decimal/hex strings — a program that seeded the generator search from the curve's own parameters would produce a value shared only if the input was shared, so this tests the hypothesis more than it finds the answer.
 
-### 4.2 Explain the top byte and the 192k1 prefix
+### 4.2 Explain the top byte and the 192k1 prefix (partly done — record §7.3.2)
+Found: b(192k1) = c(224/256k1) + (0x55412 ≪ 172) + 3, and c − a(160k1) = 0x3b3·2¹⁵² + 1. In 32-bit words the low five are one block (`78ce563f …`), the sixth word is 0x3b (224/256) or 0x0554123b (192), and the 160-bit curve has top byte 0x48 = 0x78 − 0x30. X9.62 seed-to-field expansion is excluded by the identical 224/256 values (its top word would be v = 64 vs 96 bits of SHA-1 output, not a 6-bit `3b` on both). Still untested: the sixth word as a counter/attempt index, or as uninitialised buffer contents.
 Test whether `48`/`78` and `3b`/`554123b` are (a) a counter, (b) top bytes of a second digest of the same string with a counter (X9.62 seed-expansion style: SHA-1(s‖i) chained), (c) the X9.62 expansion of a 160-bit input to field length — compute the expansion for each field and compare high bits, (d) an artefact of a 32-bit-word layout (the 166-bit value is 5×32 + 6 bits; the 187-bit one 5×32 + 27). Any hypothesis must produce `48` on the 160-bit curve and `78` on the others from the same source.
 
 ### 4.3 The secp160r pair
@@ -92,7 +97,7 @@ Rerun the K-163 search with the 4.1 strings. Also test: the 126-bit value as the
 SEC 1 / SEC 2 drafts 1999–2000; Certicom ECC Challenge documents (1997); IEEE P1363 working-group archives; WTLS (WAP) spec and drafts; ANSI X9.62/X9.63 drafts; any Certicom test-vector or "ECC parameters" documents; the SECG mailing list archive. A draft with a *different* generator dates the constant; a draft with a *stated derivation* ends the search. Nobody has done this pass.
 
 ### 4.6 The NIST prime curves P-224/256/384/521
-Nothing hash-sized at subgroup multiples ≤ 2¹⁶. Next: X9.62-style expansions of candidate strings compared against x(G), x(G/2), x(2G) …; `lrand48` and FreeLIP `zrandom` streams (both clock conventions Anthropic found) windowed against those coordinates; the P-192 FreeLIP recipe run with *every* small seed 1…100000 on each of the four curves (cheap, decisive if it hits).
+Nothing hash-sized at subgroup multiples ≤ 2¹⁶. FreeLIP recipe with every seed 1…100000, discards 0…12: `scripts/freelip_sweep.py`, 0 hits on all four curves and on secp160k1 (`results/freelip-sweep-{a,b}.txt`, record §7.3.4). Remaining: X9.62-style expansions of candidate strings compared against x(G), x(G/2), x(2G) …; `lrand48` and FreeLIP `zrandom` streams (both clock conventions Anthropic found) windowed against those coordinates; larger FreeLIP seeds or an `lrand48` stream in place of `zrandom`.
 
 ## 4b. The hash angle (added later on 20 Oct)
 `notes/hash-angle.md` is the plan for treating the constants as hash digests: what the Merkle–Damgård / Davies–Meyer structure gives (single-block model with ≤ 5 unknown message words, step inversion for reconstructing executions) and what it does not (no shortcut past enumerating candidates — the feed-forward is one-way; the step inversion recovers the input IHV from the final *working state*, not from the digest). Two plans: **V1** GPU dictionary/mask attacks with hashcat using a 12,288-target list that covers every completion of the 148-bit core in three readings (`scripts/make_targets.py`), seeded with `wordlists/certicom.txt`; **V2** language-model-generated candidate sentences for the Solinas-lore class of input. `references/README.md` lists the Stevens / Stevens–Shumow papers to read for the forward/backward technique and says what to check them against.
@@ -103,18 +108,20 @@ Nothing hash-sized at subgroup multiples ≤ 2¹⁶. Next: X9.62-style expansion
 README.md                  framing + status
 HANDOFF.md                 this file
 notes/plan.md              hypotheses H1–H4 and the six-step plan, with steps 1–2 marked done
-notes/record.md            full computational record (Part C of the original notes: §7, 7.1, 7.2)
+notes/record.md            full computational record (§7, 7.1, 7.2; §7.3 = the 20 Oct second-session experiments)
 notes/base-point-brief.md  older hand-off brief (superseded where it disagrees with plan.md)
 scripts/secg_scan.py       SEC 2 prime-curve scan (pure Python, ~2 min for all ten)
-scripts/secg_core_search.py core-matched dictionary search (reuses k163/strings.py and k163/hashes.py)
+scripts/secg_core_search.py core-matched dictionary search (STRINGS=strings|strings_certicom selects the set)
+scripts/nibble_rules.py    brute-force of last-nibble acceptance rules
+scripts/freelip_sweep.py   FreeLIP zrandom recipe x every small seed on P-224/256/384/521, secp160k1
 scripts/make_targets.py    hashcat target lists (12,288 SHA-1 for the secp core; 4 MD5 for K-163)
 wordlists/certicom.txt     Certicom-era base dictionary for the next search pass
 notes/hash-angle.md        the Merkle–Damgård analysis and the V1/V2 search plans
 references/README.md       Stevens / Stevens–Shumow papers to add and what to extract from them
 scripts/binpts.py, .gp     NIST binary-curve scan (Python / PARI)
-scripts/k163/              hash dictionary harness: search.py, strings.py, hashes.py (MD4, SHA-0, RIPEMD-128)
+scripts/k163/              hash dictionary harness: search.py, strings.py, strings_certicom.py, hashes.py (MD4, SHA-0, RIPEMD-128)
 data/bincurves.json        verified NIST binary-curve parameters
-results/                   secg-halfpoints.{txt,json}, secg-core-search.txt, binpts.out, mult.out, k163-search-rerun.txt
+results/                   secg-halfpoints.{txt,json}, secg-core-search{,-certicom}.txt, binpts.out, mult.out, k163-search-{rerun,certicom}.txt, nibble-rules.txt, freelip-sweep-{a,b}.txt
 ```
 
 ## 6. Practical notes for the agent

@@ -1,0 +1,11 @@
+  P-521: seed 20000
+  P-521: seed 40000
+  P-521: seed 60000
+  P-521: seed 80000
+  P-521: seed 100000
+  secp160k1: seed 20000
+  secp160k1: seed 40000
+  secp160k1: seed 60000
+  secp160k1: seed 80000
+  secp160k1: seed 100000
+done: seeds 1..100000 x discards 0..12, standard limb count, on ['P-521', 'secp160k1']: 0 hits
