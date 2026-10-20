@@ -27,6 +27,7 @@ The secp\*k1 observation was first made in the Heninger–Scholl–Shumow Crypto
 | [`results/`](results/) | every number behind the statements above |
 | [`tests/`](tests/) | positive controls: every search here must recover a planted or known answer (`python3 -m unittest discover -s tests`) |
 | [`wordlists/`](wordlists/), `scripts/make_targets.py` | the hashcat side of the search: Certicom-era dictionary and the 12,288-target list |
+| [`GPU-Experiments-ToDo.md`](GPU-Experiments-ToDo.md) | outstanding heavy GPU experiments, tooling prerequisites, budgets, and completion criteria |
 
 ## Status (20 October 2026)
 
@@ -38,6 +39,85 @@ Everything run so far is negative, and each negative is now backed by a positive
 - The 192k1 value is the 224/256k1 value with `55412` written in above bit 172 and the last nibble raised by 3; the X9.62 seed-to-field expansion is excluded.
 
 The next step is **V1** of [`notes/hash-angle.md`](notes/hash-angle.md): the same search as a GPU dictionary-and-mask attack with hashcat against the 12,288-target list, which reaches candidate spaces (all printable ASCII to length 8, rule-expanded dictionaries) that pure-Python passes cannot. We are experimenting on laptop-class GPUs. **If you have GPU time and would like to run this, we'd be happy to talk** — open an issue or get in touch.
+
+## Running locally on Windows with WSL
+
+[`scripts/local.py`](scripts/local.py) uses **native Windows hashcat for the GPU**
+and **Docker inside local WSL for Python/PARI**. It does not use a remote runner.
+Windows GPU access avoids requiring a separate Intel OpenCL runtime inside WSL.
+Hashcat itself runs on the Windows host, **not inside the container sandbox**.
+
+Prerequisites:
+
+- Native Windows Python 3.10 or newer (`python --version`).
+- WSL 2, an Ubuntu distribution, and a working Docker daemon in that distribution.
+- A Windows GPU compute driver and the official portable
+  [hashcat release](https://hashcat.net/hashcat/). Extract the complete archive to
+  `.tools\hashcat-7.1.2`, or pass `--hashcat C:\path\to\hashcat.exe`.
+  Verify the detached signature against the signing-key fingerprint published on
+  the hashcat download page before running downloaded binaries.
+
+From the repository root in PowerShell:
+
+```powershell
+python scripts\local.py build
+python scripts\local.py test
+python scripts\local.py gpu-info
+python scripts\local.py smoke
+```
+
+`build` uses the local WSL host network to download the Python image and PARI/GP
+over HTTPS, with bounded package-manager retries. Later container runs have no
+external network, a read-only root and source checkout, no Linux capabilities,
+no privilege escalation, a non-root user, two CPUs, 2 GiB RAM with no additional
+swap, and 512 MiB temporary storage. Only the specific run's output directory
+is mounted writable. The Docker socket, Windows home directory, and GPU are
+not mounted into the container. `test` checks the effective isolation before
+running the existing and local-runner tests.
+The test command also includes the upstream SEC validation suite and its
+independent PARI checks; planted core-search controls validate the CLI's JSON
+manifest rather than its older console format.
+
+`gpu-info` must report a GPU backend. If its device ID is not 1, use, for example,
+`python scripts\local.py --device 2 smoke`. GPU commands require GPU devices
+(`-D 2`); they do not silently fall back to the CPU or use `--force`.
+
+`smoke` runs a tiny dictionary through the actual 12,288 SHA-1 and four MD5
+research targets, plus two planted controls for each algorithm. One control
+needs the append-`1` rule. Both must be recovered in the same pass and their
+digests are independently checked in Python; controls are never discoveries.
+
+**SHA-1 comparison detail:** hashcat mode 100 compares only four of the five
+SHA-1 words. On hashcat 7.1.2 the 12,290 input lines therefore collapse to 290
+GPU comparison keys, and the reported hash can have a representative's first
+word rather than the candidate's actual first word. The runner rehashes each
+recovered candidate and checks membership in the **full target list**, preserving
+the required 148-bit match. Partial GPU matches are recorded and rejected, and
+`--keep-guessing` prevents one from suppressing a later full match.
+
+To run a bounded dictionary search after the smoke test:
+
+```powershell
+python scripts\local.py search --seconds 60
+python scripts\local.py search --seconds 300 --wordlist C:\data\words.txt --rules C:\tools\hashcat\rules\best64.rule
+```
+
+The default dictionary is `wordlists\certicom.txt`. Identity and append-`1`
+rules and a bare control word are added to every search, including custom
+rule sets. Each algorithm has its own time budget; initialization and kernel
+compilation are additional, and workload profile 1 keeps the machine more
+responsive. This runner handles dictionary/rule passes; large mask searches
+remain explicit hashcat commands, not an automatic next step.
+
+Every GPU run gets a new ignored `runs\...` directory containing target lists,
+the exact dictionary/rules, logs, potfiles, restore state when hashcat writes
+it, and `run.json` with input hashes, container image ID, commands, timings,
+verified controls, and real hits. Hashcat exit 1 means the configured pass was
+exhausted, not a tool failure. Exit 4 is preserved as a time-limited,
+**incomplete** search, never a negative result; other errors or missing controls
+fail explicitly. `prepare` generates the same inputs without starting the GPU.
+`--distro` selects another local WSL distribution. Downloads in `.tools` and
+outputs in `runs` are not committed.
 
 ## Who
 
