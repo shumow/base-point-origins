@@ -99,7 +99,7 @@ SEC 1 / SEC 2 drafts 1999–2000; Certicom ECC Challenge documents (1997); IEEE 
 ### 4.6 The NIST prime curves P-224/256/384/521
 Nothing hash-sized at subgroup multiples ≤ 2¹⁶. FreeLIP recipe with every seed 1…100000, discards 0…12: `scripts/freelip_sweep.py`, 0 hits on all four curves and on secp160k1 (`results/freelip-sweep-{a,b}.txt`, record §7.3.4). Remaining: X9.62-style expansions of candidate strings compared against x(G), x(G/2), x(2G) …; `lrand48` and FreeLIP `zrandom` streams (both clock conventions Anthropic found) windowed against those coordinates; larger FreeLIP seeds or an `lrand48` stream in place of `zrandom`.
 
-## 4b. The hash angle (added later on 20 Oct)
+## 4b. The hash angle (added later on 20 Oct; §2a of the note holds the paper ingestion and Dan's framing, and `scripts/sha1_steps.py` the forward/backward implementation; V1 is the agreed first scenario)
 `notes/hash-angle.md` is the plan for treating the constants as hash digests: what the Merkle–Damgård / Davies–Meyer structure gives (single-block model with ≤ 5 unknown message words, step inversion for reconstructing executions) and what it does not (no shortcut past enumerating candidates — the feed-forward is one-way; the step inversion recovers the input IHV from the final *working state*, not from the digest). Two plans: **V1** GPU dictionary/mask attacks with hashcat using a 12,288-target list that covers every completion of the 148-bit core in three readings (`scripts/make_targets.py`), seeded with `wordlists/certicom.txt`; **V2** language-model-generated candidate sentences for the Solinas-lore class of input. `references/README.md` lists the Stevens / Stevens–Shumow papers to read for the forward/backward technique and says what to check them against.
 
 ## 5. Repository map
@@ -114,6 +114,7 @@ scripts/secg_scan.py       SEC 2 prime-curve scan (pure Python, ~2 min for all t
 scripts/secg_core_search.py core-matched dictionary search (STRINGS=strings|strings_certicom selects the set)
 scripts/nibble_rules.py    brute-force of last-nibble acceptance rules
 scripts/freelip_sweep.py   FreeLIP zrandom recipe x every small seed on P-224/256/384/521, secp160k1
+scripts/sha1_steps.py      step-level SHA-1, forward + backward, self-tested (hash-angle §2a)
 scripts/make_targets.py    hashcat target lists (12,288 SHA-1 for the secp core; 4 MD5 for K-163)
 wordlists/certicom.txt     Certicom-era base dictionary for the next search pass
 notes/hash-angle.md        the Merkle–Damgård analysis and the V1/V2 search plans
