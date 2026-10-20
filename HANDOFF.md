@@ -93,6 +93,9 @@ SEC 1 / SEC 2 drafts 1999–2000; Certicom ECC Challenge documents (1997); IEEE 
 ### 4.6 The NIST prime curves P-224/256/384/521
 Nothing hash-sized at subgroup multiples ≤ 2¹⁶. Next: X9.62-style expansions of candidate strings compared against x(G), x(G/2), x(2G) …; `lrand48` and FreeLIP `zrandom` streams (both clock conventions Anthropic found) windowed against those coordinates; the P-192 FreeLIP recipe run with *every* small seed 1…100000 on each of the four curves (cheap, decisive if it hits).
 
+## 4b. The hash angle (added later on 20 Oct)
+`notes/hash-angle.md` is the plan for treating the constants as hash digests: what the Merkle–Damgård / Davies–Meyer structure gives (single-block model with ≤ 5 unknown message words, step inversion for reconstructing executions) and what it does not (no shortcut past enumerating candidates — the feed-forward is one-way; the step inversion recovers the input IHV from the final *working state*, not from the digest). Two plans: **V1** GPU dictionary/mask attacks with hashcat using a 12,288-target list that covers every completion of the 148-bit core in three readings (`scripts/make_targets.py`), seeded with `wordlists/certicom.txt`; **V2** language-model-generated candidate sentences for the Solinas-lore class of input. `references/README.md` lists the Stevens / Stevens–Shumow papers to read for the forward/backward technique and says what to check them against.
+
 ## 5. Repository map
 
 ```
@@ -103,6 +106,10 @@ notes/record.md            full computational record (Part C of the original not
 notes/base-point-brief.md  older hand-off brief (superseded where it disagrees with plan.md)
 scripts/secg_scan.py       SEC 2 prime-curve scan (pure Python, ~2 min for all ten)
 scripts/secg_core_search.py core-matched dictionary search (reuses k163/strings.py and k163/hashes.py)
+scripts/make_targets.py    hashcat target lists (12,288 SHA-1 for the secp core; 4 MD5 for K-163)
+wordlists/certicom.txt     Certicom-era base dictionary for the next search pass
+notes/hash-angle.md        the Merkle–Damgård analysis and the V1/V2 search plans
+references/README.md       Stevens / Stevens–Shumow papers to add and what to extract from them
 scripts/binpts.py, .gp     NIST binary-curve scan (Python / PARI)
 scripts/k163/              hash dictionary harness: search.py, strings.py, hashes.py (MD4, SHA-0, RIPEMD-128)
 data/bincurves.json        verified NIST binary-curve parameters
