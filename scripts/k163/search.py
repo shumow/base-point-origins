@@ -1,6 +1,6 @@
 """Hash every candidate string with every 1990s hash and compare against the K-163 half-point x in several readings."""
 import hashlib, sys
-from hashes import md4, sha0, ripemd128
+from hashes import md4, sha0, ripemd128, ripemd160_best
 import importlib, os
 all_strings = importlib.import_module(os.environ.get("STRINGS", "strings")).all_strings   # STRINGS=strings_certicom for the §4.1 set
 
@@ -17,7 +17,7 @@ def readings(d: bytes):
     return out
 HASHES = {
     "md5": lambda b: hashlib.md5(b).digest(), "md4": md4, "sha1": lambda b: hashlib.sha1(b).digest(), "sha0": sha0,
-    "ripemd128": ripemd128, "ripemd160": lambda b: hashlib.new("ripemd160", b).digest(),
+    "ripemd128": ripemd128, "ripemd160": ripemd160_best,
     "md5(md5)": lambda b: hashlib.md5(hashlib.md5(b).digest()).digest(), "md5(hex md5)": lambda b: hashlib.md5(hashlib.md5(b).hexdigest().encode()).digest(),
     "sha1(sha1)": lambda b: hashlib.sha1(hashlib.sha1(b).digest()).digest(),
 }

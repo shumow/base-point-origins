@@ -210,6 +210,17 @@ class TestEcArithmetic(unittest.TestCase):
             self.assertEqual(f"{c.mul((c.n + 1) // 2, G)[0]:x}", hx)
 
 
+class TestHashes(unittest.TestCase):
+    def test_pure_python_hashes_against_published_vectors(self):
+        from hashes import md4, sha0, ripemd128, ripemd160, ripemd160_best
+        self.assertEqual(md4(b"abc").hex(), "a448017aaf21d8525fc10ae87aa6729d")
+        self.assertEqual(sha0(b"abc").hex(), "0164b8a914cd2a5e74c4f7ff082c4d97f1edf880")
+        self.assertEqual(ripemd128(b"abc").hex(), "c14a12199c66e4ba84636b0f69144c77")
+        self.assertEqual(ripemd160(b"abc").hex(), "8eb208f7e05d987a9b044a8e98c6b087f15a0bfc")
+        self.assertEqual(ripemd160(b"message digest").hex(), "5d0689ef49d2fae572b881b123a85ffa21595f36")
+        self.assertEqual(ripemd160_best(b"abc"), ripemd160(b"abc"))   # whichever backend, same answer
+
+
 class TestSha1Steps(unittest.TestCase):
     def test_backward_from_digest_recovers_iv_and_rejects_wrong_block(self):
         msg = b"Standards for Efficient Cryptography"

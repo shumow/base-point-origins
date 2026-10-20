@@ -6,7 +6,7 @@ and the secp160k1 value 48ce...9c62 exactly."""
 import hashlib, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent / "k163"))
-from hashes import sha0
+from hashes import sha0, ripemd160_best
 import importlib, os
 all_strings = importlib.import_module(os.environ.get("STRINGS", "strings")).all_strings   # STRINGS=strings_certicom for the §4.1 set
 
@@ -19,12 +19,10 @@ FULL = {0x48ce563f89a0ed9414f5aa28ad0d96d6795f9c62: "secp160k1 x(G/2)",
 HASHES = {
     "sha1": lambda b: hashlib.sha1(b).digest(),
     "sha0": sha0,
-    "ripemd160": lambda b: hashlib.new("ripemd160", b).digest(),
+    "ripemd160": ripemd160_best,
     "sha1(sha1)": lambda b: hashlib.sha1(hashlib.sha1(b).digest()).digest(),
     "sha1(md5)": lambda b: hashlib.sha1(hashlib.md5(b).digest()).digest(),
 }
-try: HASHES["ripemd160"](b"")
-except Exception: del HASHES["ripemd160"]
 
 def readings(d):
     yield "d", d
