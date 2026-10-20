@@ -13,7 +13,18 @@
    "9482*G"
   ],
   "found": [],
-  "cofactor_preimage_x_bits": [],
+  "cofactor_preimage_x_bits": [
+   108
+  ],
+  "cofactor_preimages": [
+   {
+    "x": "9487239995a5ee76b55f9c2f098",
+    "y": "a89ce5af8724c0a23e0e0ff77500"
+   }
+  ],
+  "cofactor_preimages_complete": true,
+  "multiple_bound": 65536,
+  "inverse_bound": 4096,
   "rough_expected_min": 95
  },
  "secp112r2": {
@@ -36,6 +47,27 @@
    111,
    111
   ],
+  "cofactor_preimages": [
+   {
+    "x": "79537101c56a67185de36f3c4ec",
+    "y": "1797a9cb9631a0337660f32ee1a9"
+   },
+   {
+    "x": "9487239995a5ee76b55f9c2f098",
+    "y": "b6d21afe780e1840858a06e3c5d9"
+   },
+   {
+    "x": "4c0484e22ce37887cf22d6872e68",
+    "y": "153021323d2c6dc9c3c9f50fe427"
+   },
+   {
+    "x": "7d611286bd2f09eccec958e06925",
+    "y": "bde0cb209db459793cb0386cec99"
+   }
+  ],
+  "cofactor_preimages_complete": true,
+  "multiple_bound": 65536,
+  "inverse_bound": 4096,
   "rough_expected_min": 95
  },
  "secp128r1": {
@@ -52,7 +84,18 @@
    "46572*G"
   ],
   "found": [],
-  "cofactor_preimage_x_bits": [],
+  "cofactor_preimage_x_bits": [
+   125
+  ],
+  "cofactor_preimages": [
+   {
+    "x": "161ff7528b899b2d0c28607ca52c5b86",
+    "y": "cf5ac8395bafeb13c02da292dded7a83"
+   }
+  ],
+  "cofactor_preimages_complete": true,
+  "multiple_bound": 65536,
+  "inverse_bound": 4096,
   "rough_expected_min": 111
  },
  "secp128r2": {
@@ -75,6 +118,27 @@
    128,
    128
   ],
+  "cofactor_preimages": [
+   {
+    "x": "161ff7528b899b2d0c28607ca52c5b86",
+    "y": "297b6d457522b9df950db03776455620"
+   },
+   {
+    "x": "65f848e58fc216105abaa30ffb46f070",
+    "y": "2457f7b5deec978fccb147d2cf8e34dc"
+   },
+   {
+    "x": "bccf4568a73caff0b03735347f613965",
+    "y": "7c892d69689da77989c7e2b5d0edcabf"
+   },
+   {
+    "x": "e4479e9014b34cf10c1602a89667d7f6",
+    "y": "6e4e553f11e99860eaebd7bb4bc79401"
+   }
+  ],
+  "cofactor_preimages_complete": true,
+  "multiple_bound": 65536,
+  "inverse_bound": 4096,
   "rough_expected_min": 111
  },
  "secp160k1": {
@@ -91,7 +155,18 @@
    "14977*G"
   ],
   "found": [],
-  "cofactor_preimage_x_bits": [],
+  "cofactor_preimage_x_bits": [
+   158
+  ],
+  "cofactor_preimages": [
+   {
+    "x": "3b4c382ce37aa192a4019e763036f4f5dd4d7ebb",
+    "y": "938cf935318fdced6bc28286531733c3f03c4fee"
+   }
+  ],
+  "cofactor_preimages_complete": true,
+  "multiple_bound": 65536,
+  "inverse_bound": 4096,
   "rough_expected_min": 143
  },
  "secp160r1": {
@@ -108,7 +183,18 @@
    "41811*G"
   ],
   "found": [],
-  "cofactor_preimage_x_bits": [],
+  "cofactor_preimage_x_bits": [
+   159
+  ],
+  "cofactor_preimages": [
+   {
+    "x": "4a96b5688ef573284664698968c38bb913cbfc82",
+    "y": "23a628553168947d59dcc912042351377ac5fb32"
+   }
+  ],
+  "cofactor_preimages_complete": true,
+  "multiple_bound": 65536,
+  "inverse_bound": 4096,
   "rough_expected_min": 143
  },
  "secp160r2": {
@@ -125,7 +211,18 @@
    "13257*G"
   ],
   "found": [],
-  "cofactor_preimage_x_bits": [],
+  "cofactor_preimage_x_bits": [
+   159
+  ],
+  "cofactor_preimages": [
+   {
+    "x": "52dcb034293a117e1f4ff11b30f7199d3144ce6d",
+    "y": "feaffef2e331f296e071fa0df9982cfea7d43f2e"
+   }
+  ],
+  "cofactor_preimages_complete": true,
+  "multiple_bound": 65536,
+  "inverse_bound": 4096,
   "rough_expected_min": 143
  },
  "secp192k1": {
@@ -142,7 +239,18 @@
    "64169*G"
   ],
   "found": [],
-  "cofactor_preimage_x_bits": [],
+  "cofactor_preimage_x_bits": [
+   192
+  ],
+  "cofactor_preimages": [
+   {
+    "x": "db4ff10ec057e9ae26b07d0280b7f4341da5d1b1eae06c7d",
+    "y": "9b2f2f6d9c5628a7844163d015be86344082aa88d95e2f9d"
+   }
+  ],
+  "cofactor_preimages_complete": true,
+  "multiple_bound": 65536,
+  "inverse_bound": 4096,
   "rough_expected_min": 175
  },
  "secp224k1": {
@@ -161,7 +269,18 @@
   "found": [
    "G/2: x 166 bits, y 220 bits, x=3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63"
   ],
-  "cofactor_preimage_x_bits": [],
+  "cofactor_preimage_x_bits": [
+   224
+  ],
+  "cofactor_preimages": [
+   {
+    "x": "a1455b334df099df30fc28a169a467e9e47075a90f7e650eb6b7a45c",
+    "y": "7e089fed7fba344282cafbd6f7e319f7c0b0bd59e2ca4bdb556d61a5"
+   }
+  ],
+  "cofactor_preimages_complete": true,
+  "multiple_bound": 65536,
+  "inverse_bound": 4096,
   "rough_expected_min": 207
  },
  "secp256k1": {
@@ -180,7 +299,18 @@
   "found": [
    "G/2: x 166 bits, y 254 bits, x=3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63"
   ],
-  "cofactor_preimage_x_bits": [],
+  "cofactor_preimage_x_bits": [
+   255
+  ],
+  "cofactor_preimages": [
+   {
+    "x": "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+    "y": "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"
+   }
+  ],
+  "cofactor_preimages_complete": true,
+  "multiple_bound": 65536,
+  "inverse_bound": 4096,
   "rough_expected_min": 239
  }
 }

@@ -68,6 +68,7 @@ First 92 bits shared (`4a96b5688ef573284664698`), remaining 68 differ wholesale 
 `scripts/k163/search.py` against the corrected 126-bit target. Strings (`scripts/k163/strings.py`): Solinas-lore phrases ("Give Bob and Jerry a raise", "Jerry Solinas should make a million dollars a year", …), people (Solinas, Reiter, Koblitz, Miller, Menezes, Vanstone, Schroeppel, Johnson, Brown), orgs (NSA, NIST, ANSI, X9.62, IEEE P1363, SECG, Certicom, WAP, WTLS), curve names in many spellings, generic words, small integers, the B-163 seed and K-163 G coordinates as hex strings, every date 1997-01-01…1998-12-31 in 13 formats, the run timestamps as decimal/halved/doubled/hex/ctime; each in case variants, with trailing `.`, `!`, space, newline, CRLF, NUL, leading space; encoded ASCII, UTF-16-LE, UTF-16-BE. Hashes: MD5, MD4, SHA-0, SHA-1, RIPEMD-128, RIPEMD-160, SHA-1∘SHA-1 (`hashes.py` has pure-Python MD4/SHA-0/RIPEMD-128). Suffixes: none, and counter 0–3 as a byte / decimal char / 4-byte BE. Readings: as-is, byte-reversed, 32-bit-word-swapped, low/high 128 of a 160-bit digest, top-two-bits-masked, first-15-bytes. Result: `results/k163-search-rerun.txt`.
 
 ### 3.2 Core-matched dictionary for the secp constant (16,432,065 evaluations, 0 hits)
+*Re-certified 20 Oct* with the repaired script (strict hash initialization, coverage manifest): same 16,432,065 evaluations, 0 hits, all five algorithms confirmed present; manifest in `results/secg-core-search.json` (algorithms, suffixes, readings, input-sequence hash, source hashes, Python/OpenSSL versions).
 `scripts/secg_core_search.py`: same string set; SHA-1, SHA-0, RIPEMD-160, SHA-1∘SHA-1, SHA-1∘MD5; same suffixes; readings as-is / reversed / word-swapped; **matcher compares bits 4–151 only** against the core, so the varying top byte and last nibble cannot hide a hit; also checks the full 160-bit values with top byte 48 or 78. Result: `results/secg-core-search.txt`. Caveat: this string set was built for the NSA/NIST story. It does not contain Certicom-specific material (see §4.1).
 
 ### 3.3 Certicom-era dictionary pass (§4.1, done 20 Oct, second session; 0 hits)
@@ -119,6 +120,7 @@ scripts/nibble_rules.py    brute-force of last-nibble acceptance rules
 scripts/freelip_sweep.py   FreeLIP zrandom recipe x every small seed on P-224/256/384/521, secp160k1
 tests/test_recovery.py     positive controls for every search (§4c)
 scripts/sha1_steps.py      step-level SHA-1, forward + backward, self-tested (hash-angle §2a)
+scripts/test_secg.py       regression tests for the SEC 2 scan and core search
 scripts/make_targets.py    hashcat target lists (12,288 SHA-1 for the secp core; 4 MD5 for K-163)
 wordlists/certicom.txt     Certicom-era base dictionary for the next search pass
 notes/hash-angle.md        the Merkle–Damgård analysis and the V1/V2 search plans
@@ -128,6 +130,9 @@ scripts/k163/              hash dictionary harness: search.py, strings.py, strin
 data/bincurves.json        verified NIST binary-curve parameters
 results/                   secg-halfpoints.{txt,json}, secg-core-search{,-certicom}.txt, binpts.out, mult.out, k163-search-{rerun,certicom}.txt, nibble-rules.txt, freelip-sweep-{a,b}.txt
 ```
+
+## 5b. Review ported 20 Oct
+A Copilot review of the follow-up repo's copies (`review/base-points-corrections` there) was reviewed and its worthwhile parts ported here rather than merged there: `secg_scan.py` now enumerates and validates the full cofactor kernel E[h] and preimage coset or fails explicitly (no silent partial lists), records scan bounds and preimage witnesses in the JSON, and has `--output-dir`/bound flags; `secg_core_search.py` refuses to run if any configured hash is unavailable and writes a JSON manifest; `scripts/test_secg.py` (18 tests; one needs PARI) checks generator/half relations, the shared core and prefix, kernel-failure modes, cached witnesses and output paths. Run: `python -X utf8 -m unittest discover -s scripts -p test_secg.py -v`. The review's extra hedging ("does not establish the construction direction", "does not rule out untested hidden properties") was not adopted: two curves over different fields with the identical x at G/2 can only come from a shared x input, and the rest is boilerplate.
 
 ## 6. Practical notes for the agent
 - SEC 2 v2.0 (secg.org/sec2-v2.pdf) dropped the ≤160-bit curves; their parameters are in SEC 2 v1.0 (secg.org/SEC2-Ver-1.0.pdf). Both were fetched 20 Oct and the parameters in `secg_scan.py` were verified by n·G = O.
