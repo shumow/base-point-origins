@@ -59,18 +59,21 @@ class TestCoreMatcher(unittest.TestCase):
             self.assertIsNotNone(core.check(v.to_bytes(20, "big")))
         self.assertIsNone(core.check(hashlib.sha1(b"not it").digest()))
 
-    def test_planted_sha1_found_through_main(self):
+    def test_planted_sha1_found_through_search(self):
         plant_core(hashlib.sha1(b"Certicom").digest())
-        out = run_main(core, [("decoy", b"decoy"), ("ascii:'Certicom'", b"Certicom"), ("decoy2", b"other")])
-        self.assertIn("HIT ascii:'Certicom' sha1 b''", out)
-        self.assertIn("1 hits", out)
+        result = core.search([("decoy", b"decoy"), ("ascii:'Certicom'", b"Certicom"), ("decoy2", b"other")])
+        hits = result["hits"]
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0]["label"], "ascii:'Certicom'")
+        self.assertEqual(hits[0]["algorithm"], "sha1")
+        self.assertEqual(hits[0]["suffix_hex"], "")
 
     def test_planted_with_counter_suffix_and_sha0(self):
         # a hit that only exists with the X9.62-style counter 2 appended as a byte, under SHA-0
         from hashes import sha0
         plant_core(sha0(b"Waterloo" + bytes([2])))
-        out = run_main(core, [("w", b"Waterloo")])
-        self.assertIn("HIT w sha0 b'\\x02'", out)
+        hits = core.search([("w", b"Waterloo")])["hits"]
+        self.assertTrue(any(h["algorithm"] == "sha0" and h["suffix_hex"] == "02" for h in hits))
 
     def test_planted_reversed_reading(self):
         # digest stored byte-reversed: the 'rev' reading must catch it
