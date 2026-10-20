@@ -25,10 +25,19 @@ The secp\*k1 observation was first made in the Heninger–Scholl–Shumow Crypto
 | [`notes/base-point-brief.md`](notes/base-point-brief.md) | the earlier hand-off brief |
 | [`scripts/`](scripts/) | `secg_scan.py` (SEC 2 prime curves), `binpts.py`/`.gp` (NIST binary curves), `k163/` (hash-preimage harness), `secg_core_search.py` (core-matched search) |
 | [`results/`](results/) | every number behind the statements above |
+| [`tests/`](tests/) | positive controls: every search here must recover a planted or known answer (`python3 -m unittest discover -s tests`) |
+| [`wordlists/`](wordlists/), `scripts/make_targets.py` | the hashcat side of the search: Certicom-era dictionary and the 12,288-target list |
 
-## Status
+## Status (20 October 2026)
 
-Two of the six steps in the plan have been run, both negative: no obvious acceptance rule selects the per-curve last nibbles 2, 6, 3, 3, and a 16.4-million-evaluation SHA-1/SHA-0/RIPEMD-160 search over NIST-era strings does not produce the 148-bit core. The Certicom-era string pass is the next experiment.
+Everything run so far is negative, and each negative is now backed by a positive control in `tests/`:
+
+- No acceptance rule among ~11,500 tried selects the per-curve last nibbles 2, 6, 3, 3.
+- The 148-bit core is not the SHA-1 / SHA-0 / RIPEMD-160 (or doubled-hash) digest of any of ~290,000 NIST-era and Certicom-era strings in their case / punctuation / encoding / counter variants — three independent passes, ~70 million evaluations in all. The K-163 value is not the MD5 / MD4 / RIPEMD-128 (or truncated SHA-1) digest of any of them either.
+- The FreeLIP `zrandom` recipe that produced P-192's base point does not produce P-224/256/384/521's or secp160k1's for any seed below 100,000.
+- The 192k1 value is the 224/256k1 value with `55412` written in above bit 172 and the last nibble raised by 3; the X9.62 seed-to-field expansion is excluded.
+
+The next step is **V1** of [`notes/hash-angle.md`](notes/hash-angle.md): the same search as a GPU dictionary-and-mask attack with hashcat against the 12,288-target list, which reaches candidate spaces (all printable ASCII to length 8, rule-expanded dictionaries) that pure-Python passes cannot. We are experimenting on laptop-class GPUs. **If you have GPU time and would like to run this, we'd be happy to talk** — open an issue or get in touch.
 
 ## Who
 

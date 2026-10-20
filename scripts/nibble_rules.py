@@ -69,12 +69,16 @@ def features(c, x):
     f["y!=y(2P) parity"] = (ye % 2) != (c.add((x, ye), (x, ye))[1] % 2)
     return f
 
-def main():
-    span = 48
+def main(used=None, span=48, pairs=True, verbose=True):
+    """Returns the list of matching rules. `used` maps curve -> index of the x actually used (default: the published 2,6,3,3);
+    tests plant a synthetic `used` to check the search finds a known rule."""
+    USED_ = used or USED
     tables = {}
-    for name in USED:
+    def say(*a):
+        if verbose: print(*a)
+    for name in USED_:
         c = C(CURVES[name]); tables[name] = [features(c, BASES[name] + i) for i in range(-16, span)]
-    names = list(USED); keys = sorted({k for t in tables.values() for row in t if row for k in row})
+    names = list(USED_); keys = sorted({k for t in tables.values() for row in t if row for k in row})
     def first(name, b, key, direction=1, kth=1):
         t = tables[name]; i = b; hits = 0
         while -16 <= i < span:
@@ -84,27 +88,28 @@ def main():
                 if hits == kth: return i
             i += direction
         return None
-    found = 0
+    found = []
     for b in range(-16, 16):
         for key in keys:
             for direction in (1, -1):
                 for kth in (1, 2, 3):
-                    if all(first(n, b, key, direction, kth) == USED[n] for n in names):
-                        print(f"MATCH start={b:+d} dir={direction:+d} kth={kth} prop={key}"); found += 1
+                    if all(first(n, b, key, direction, kth) == USED_[n] for n in names):
+                        say(f"MATCH start={b:+d} dir={direction:+d} kth={kth} prop={key}"); found.append((b, direction, kth, key))
     # pairs of properties (conjunction), upward from start 0..3, first hit
-    for b in range(0, 4):
+    for b in (range(0, 4) if pairs else ()):
         for k1, k2 in itertools.combinations(keys, 2):
             def firstc(name):
                 t = tables[name]
                 for i in range(b, span):
                     row = t[i + 16]
                     if row and row.get(k1, False) and row.get(k2, False): return i
-            if all(firstc(n) == USED[n] for n in names):
-                print(f"MATCH2 start={b} prop={k1} AND {k2}"); found += 1
-    print("done, matches:", found)
+            if all(firstc(n) == USED_[n] for n in names):
+                say(f"MATCH2 start={b} prop={k1} AND {k2}"); found.append((b, 1, 1, f"{k1} AND {k2}"))
+    say("done, matches:", len(found))
     # dump the per-curve on-curve indices for reference
     for n in names:
-        print(n, "on-curve i in [-16,48):", [i - 16 for i, r in enumerate(tables[n]) if r])
+        say(n, f"on-curve i in [-16,{span}):", [i - 16 for i, r in enumerate(tables[n]) if r])
+    return found
 
 if __name__ == "__main__":
     main()

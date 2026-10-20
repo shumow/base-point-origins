@@ -13,8 +13,8 @@ H128 = {"md5": lambda b: hashlib.md5(b).digest(), "md4": md4, "ripemd128": ripem
 def main(path):
     n = 0; hits = []
     seen = set()
-    for line in open(path, encoding="utf-8", errors="ignore"):
-        s = line.rstrip("\n")
+    for line in Path(path).read_text(encoding="utf-8", errors="ignore").splitlines():
+        s = line
         if not s: continue
         for v in variants(s):
             if v in seen: continue

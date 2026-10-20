@@ -102,6 +102,9 @@ Nothing hash-sized at subgroup multiples ≤ 2¹⁶. FreeLIP recipe with every s
 ## 4b. The hash angle (added later on 20 Oct; §2a of the note holds the paper ingestion and Dan's framing, and `scripts/sha1_steps.py` the forward/backward implementation; V1 is the agreed first scenario)
 `notes/hash-angle.md` is the plan for treating the constants as hash digests: what the Merkle–Damgård / Davies–Meyer structure gives (single-block model with ≤ 5 unknown message words, step inversion for reconstructing executions) and what it does not (no shortcut past enumerating candidates — the feed-forward is one-way; the step inversion recovers the input IHV from the final *working state*, not from the digest). Two plans: **V1** GPU dictionary/mask attacks with hashcat using a 12,288-target list that covers every completion of the 148-bit core in three readings (`scripts/make_targets.py`), seeded with `wordlists/certicom.txt`; **V2** language-model-generated candidate sentences for the Solinas-lore class of input. `references/README.md` lists the Stevens / Stevens–Shumow papers to read for the forward/backward technique and says what to check them against.
 
+## 4c. Tests
+`tests/test_recovery.py` (stdlib `unittest`, ~10 s): plants a known answer through each real search entry point — the core matcher and its main loop (as-is, byte-reversed, counter-suffixed SHA-0, top-byte/last-nibble-insensitive), the K-163 matcher (MD5, low-128-of-SHA-1, masked top bits), `wordlist_search` (a punctuation variant), `make_targets` (every completion of the core in all three readings is a target), `freelip_sweep` (reproduces P-192 from seed 20000; finds a point planted on P-256 with a non-standard discard), `nibble_rules` (finds a planted first-on-curve rule and confirms the real nibbles are not one), the EC arithmetic (recomputes all four half-generator constants from the published G), and `sha1_steps`. Run it before trusting any new negative result, and add a planted case for any new search.
+
 ## 5. Repository map
 
 ```
@@ -114,6 +117,7 @@ scripts/secg_scan.py       SEC 2 prime-curve scan (pure Python, ~2 min for all t
 scripts/secg_core_search.py core-matched dictionary search (STRINGS=strings|strings_certicom selects the set)
 scripts/nibble_rules.py    brute-force of last-nibble acceptance rules
 scripts/freelip_sweep.py   FreeLIP zrandom recipe x every small seed on P-224/256/384/521, secp160k1
+tests/test_recovery.py     positive controls for every search (§4c)
 scripts/sha1_steps.py      step-level SHA-1, forward + backward, self-tested (hash-angle §2a)
 scripts/make_targets.py    hashcat target lists (12,288 SHA-1 for the secp core; 4 MD5 for K-163)
 wordlists/certicom.txt     Certicom-era base dictionary for the next search pass
