@@ -1,0 +1,40 @@
+P-256: G on curve 1, n*G=O: 1
+   half point G/2: x = 19439240795854216504166878352080480852025048076250165894565412345120149900726
+   shortest x among k*G, G/k for 2<=k<=2^16: 237 bits at G/53620 x  (p has 256 bits; expected min over 2^17 random ~ 239)
+   coordinates at least 32 bits short: none
+P-224: G on curve 1, n*G=O: 1
+   half point G/2: x = 235173296034255131142037448637144082134081968976567350417918110399
+   shortest x among k*G, G/k for 2<=k<=2^16: 208 bits at G/42457 x  (p has 224 bits; expected min over 2^17 random ~ 207)
+   coordinates at least 32 bits short: none
+P-192: G on curve 1, n*G=O: 1
+   half point G/2: x = 3022657313421880686711133267553559097318421761892165120655
+   shortest x among k*G, G/k for 2<=k<=2^16: 174 bits at 61807*G x  (p has 192 bits; expected min over 2^17 random ~ 175)
+   coordinates at least 32 bits short: none
+prime192v3: G on curve 1, n*G=O: 1
+   half point G/2: x = 1478556954239249195450543576238959700436500400148985586484
+   shortest x among k*G, G/k for 2<=k<=2^16: 176 bits at 9061*G x  (p has 192 bits; expected min over 2^17 random ~ 175)
+   coordinates at least 32 bits short: none
+prime192v2: G on curve 1, n*G=O: 1
+   half point G/2: x = 3067705303202302815584242922652844991516784379584292172083
+   shortest x among k*G, G/k for 2<=k<=2^16: 175 bits at G/7467 x  (p has 192 bits; expected min over 2^17 random ~ 175)
+   coordinates at least 32 bits short: none
+prime239v1: G on curve 1, n*G=O: 1
+   half point G/2: x = 340776869752737277358723001982203170865171062144520779468987937101956408
+   shortest x among k*G, G/k for 2<=k<=2^16: 222 bits at 41569*G x  (p has 239 bits; expected min over 2^17 random ~ 222)
+   coordinates at least 32 bits short: none
+prime239v2: G on curve 1, n*G=O: 1
+   half point G/2: x = 240124596251229556469648559719861165352845199107958197549014309010913452
+   shortest x among k*G, G/k for 2<=k<=2^16: 220 bits at G/40829 x  (p has 239 bits; expected min over 2^17 random ~ 222)
+   coordinates at least 32 bits short: none
+prime239v3: G on curve 1, n*G=O: 1
+   half point G/2: x = 232601451358491730750111733255226727301846712397305757572510149098244797
+   shortest x among k*G, G/k for 2<=k<=2^16: 221 bits at 4319*G x  (p has 239 bits; expected min over 2^17 random ~ 222)
+   coordinates at least 32 bits short: none
+P-384: G on curve 1, n*G=O: 1
+   half point G/2: x = 32543165615481091861863362084883209663999225740484399342384333496663080657123917298489415777202695616239990327677050
+   shortest x among k*G, G/k for 2<=k<=2^16: 367 bits at 14971*G x  (p has 384 bits; expected min over 2^17 random ~ 367)
+   coordinates at least 32 bits short: none
+P-521: G on curve 1, n*G=O: 1
+   half point G/2: x = 1664019621786085728782817326152282335971438675124549444592786541689946944144611419667494432778396871658327048645051520181029548248831827961954645829392474687
+   shortest x among k*G, G/k for 2<=k<=2^16: 502 bits at 10735*G x  (p has 521 bits; expected min over 2^17 random ~ 504)
+   coordinates at least 32 bits short: none

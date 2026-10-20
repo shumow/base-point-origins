@@ -1,0 +1,40 @@
+== B-163: m=163  G on curve: 1  n*G=O: 1
+   G/2: x bits 163, y bits 157  x = 11217058138627391765458473363821801169746618715572 (decimal)
+   shortest x among k*G (k<=2^16), G/k (k<=2^12): 147 bits at 37609*G  (random expectation ~ 147)
+   coordinates >=32 bits short: none
+== K-163: m=163  G on curve: 1  n*G=O: 1
+   G/2: x bits 126, y bits 161  x = 47697034746292323836159736623103569559 (decimal)
+   shortest x among k*G (k<=2^16), G/k (k<=2^12): 126 bits at G/2  (random expectation ~ 147)
+   coordinates >=32 bits short: ["G/2: x bits 126, y bits 161"]
+== B-233: m=233  G on curve: 1  n*G=O: 1
+   G/2: x bits 232, y bits 231  x = 6633956376197200902445936372848599835895653968920970575096432533815662 (decimal)
+   shortest x among k*G (k<=2^16), G/k (k<=2^12): 215 bits at G/1579  (random expectation ~ 217)
+   coordinates >=32 bits short: none
+== K-233: m=233  G on curve: 1  n*G=O: 1
+   G/2: x bits 232, y bits 233  x = 4516286689402086564972838510726445670447463327110688704442986585002437 (decimal)
+   shortest x among k*G (k<=2^16), G/k (k<=2^12): 219 bits at 11588*G  (random expectation ~ 217)
+   coordinates >=32 bits short: none
+== B-283: m=283  G on curve: 1  n*G=O: 1
+   G/2: x bits 283, y bits 281  x = 14311622233073954052128327400139415086488986343337713362954218658196477914719874268854 (decimal)
+   shortest x among k*G (k<=2^16), G/k (k<=2^12): 267 bits at 10339*G  (random expectation ~ 267)
+   coordinates >=32 bits short: none
+== K-283: m=283  G on curve: 1  n*G=O: 1
+   G/2: x bits 281, y bits 283  x = 3700423025804978156712205791362684751122378439028956805719299762906511423921159728037 (decimal)
+   shortest x among k*G (k<=2^16), G/k (k<=2^12): 267 bits at 3915*G  (random expectation ~ 267)
+   coordinates >=32 bits short: none
+== B-409: m=409  G on curve: 1  n*G=O: 1
+   G/2: x bits 408, y bits 404  x = 425859593872169766624996272153011276593736807398939343274461396364589306504511218464616524496366142334970575708620915537847 (decimal)
+   shortest x among k*G (k<=2^16), G/k (k<=2^12): 391 bits at 61654*G  (random expectation ~ 393)
+   coordinates >=32 bits short: none
+== K-409: m=409  G on curve: 1  n*G=O: 1
+   G/2: x bits 409, y bits 406  x = 1046550638429208865423711757842111675552181390461258456227721796332697590106174716506709970722595458793010982472637231751404 (decimal)
+   shortest x among k*G (k<=2^16), G/k (k<=2^12): 393 bits at 59501*G  (random expectation ~ 393)
+   coordinates >=32 bits short: none
+== B-571: m=571  G on curve: 1  n*G=O: 1
+   G/2: x bits 571, y bits 570  x = 7321268847167954299573449186497248760788703501029072418183202894288973442661937924372091296069931865002262474653437072162182364815913086178448529063706754777188151999694327 (decimal)
+   shortest x among k*G (k<=2^16), G/k (k<=2^12): 554 bits at 18258*G  (random expectation ~ 555)
+   coordinates >=32 bits short: none
+== K-571: m=571  G on curve: 1  n*G=O: 1
+   G/2: x bits 570, y bits 571  x = 3261256107676124791221064487922812609574570320837667242446507283391483348545610890254994233658489010107462793535543167150623034262130060312534849394309537162580708633947073 (decimal)
+   shortest x among k*G (k<=2^16), G/k (k<=2^12): 555 bits at 43672*G  (random expectation ~ 555)
+   coordinates >=32 bits short: none

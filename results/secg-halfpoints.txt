@@ -1,0 +1,26 @@
+Short-coordinate scan of the SEC 2 prime-field generators (k*G, k<=2^16; G/k, k<=2^12; all cofactor preimages where h>1).
+Parameters from SEC 2 v1.0 (secp112/128/160) and v2.0 (secp192k1, secp224k1, secp256k1); n*G = O verified for each.
+
+curve        m h  x(G/2) bits  shortest x  shortest y  expected  x(G/2)
+secp112r1  112 1          112    92 55891*G    97 9482*G        95  aa8728a0279bd6d44e8c99c573e7
+secp112r2  112 4          111    96 52721*G    92 8376*G        95  7beda5a3fa2430485f6af7358119
+secp128r1  128 1          127   112 28826*G   110 46572*G       111  456eb097de2096794f0a3df0bac775be
+secp128r2  128 4          128   113 37289*G   110  G/515       111  f69ff511dbd13171f8d75488000fbca2
+secp160k1  160 1          159   140 19380*G   143 14977*G       143  48ce563f89a0ed9414f5aa28ad0d96d6795f9c62
+secp160r1  160 1          157   145 4849*G   142 41811*G       143  10095f05b8f95920fd785d5c6003ee2a7f0ca3d1
+secp160r2  160 1          159   145 12334*G   143 13257*G       143  4a96b5688ef573284664698e81e1510fae4e8422
+secp192k1  192 1          187   173 G/3838   176 64169*G       175  554123b78ce563f89a0ed9414f5aa28ad0d96d6795f9c66
+secp224k1  224 1          166   166    G/2   208 34761*G       207  3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63
+secp256k1  256 1          166   166    G/2   238 22838*G       239  3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63
+
+Cofactor preimage x bit lengths (h=4 curves): secp112r2: [107, 108, 111, 111], secp128r2: [125, 127, 128, 128]
+
+Shared structure:
+  secp160k1  x(G/2) =        48ce563f89a0ed9414f5aa28ad0d96d6795f9c62
+  secp192k1  x(G/2) = 554123b78ce563f89a0ed9414f5aa28ad0d96d6795f9c66
+  secp224k1  x(G/2) =      3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63
+  secp256k1  x(G/2) =      3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63
+  secp160r1  x(G)   = 4a96b5688ef573284664698968c38bb913cbfc82
+  secp160r2  x(G/2) = 4a96b5688ef573284664698e81e1510fae4e8422
+No shared substring of >= 32 bits between any of these and the NIST/ANSI prime or binary half-generators, or between any two NIST/ANSI ones.
+Increment-until-on-curve from the common base ...9c60 does not reproduce the last nibbles (2, 6, 3, 3): base+0 is already on secp160k1, base+1 on secp256k1.

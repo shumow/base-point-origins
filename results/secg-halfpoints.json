@@ -1,0 +1,186 @@
+{
+ "secp112r1": {
+  "bits": 112,
+  "h": 1,
+  "half_x_bits": 112,
+  "half_x": "aa8728a0279bd6d44e8c99c573e7",
+  "shortest_x": [
+   92,
+   "55891*G"
+  ],
+  "shortest_y": [
+   97,
+   "9482*G"
+  ],
+  "found": [],
+  "cofactor_preimage_x_bits": [],
+  "rough_expected_min": 95
+ },
+ "secp112r2": {
+  "bits": 112,
+  "h": 4,
+  "half_x_bits": 111,
+  "half_x": "7beda5a3fa2430485f6af7358119",
+  "shortest_x": [
+   96,
+   "52721*G"
+  ],
+  "shortest_y": [
+   92,
+   "8376*G"
+  ],
+  "found": [],
+  "cofactor_preimage_x_bits": [
+   107,
+   108,
+   111,
+   111
+  ],
+  "rough_expected_min": 95
+ },
+ "secp128r1": {
+  "bits": 128,
+  "h": 1,
+  "half_x_bits": 127,
+  "half_x": "456eb097de2096794f0a3df0bac775be",
+  "shortest_x": [
+   112,
+   "28826*G"
+  ],
+  "shortest_y": [
+   110,
+   "46572*G"
+  ],
+  "found": [],
+  "cofactor_preimage_x_bits": [],
+  "rough_expected_min": 111
+ },
+ "secp128r2": {
+  "bits": 128,
+  "h": 4,
+  "half_x_bits": 128,
+  "half_x": "f69ff511dbd13171f8d75488000fbca2",
+  "shortest_x": [
+   113,
+   "37289*G"
+  ],
+  "shortest_y": [
+   110,
+   "G/515"
+  ],
+  "found": [],
+  "cofactor_preimage_x_bits": [
+   125,
+   127,
+   128,
+   128
+  ],
+  "rough_expected_min": 111
+ },
+ "secp160k1": {
+  "bits": 160,
+  "h": 1,
+  "half_x_bits": 159,
+  "half_x": "48ce563f89a0ed9414f5aa28ad0d96d6795f9c62",
+  "shortest_x": [
+   140,
+   "19380*G"
+  ],
+  "shortest_y": [
+   143,
+   "14977*G"
+  ],
+  "found": [],
+  "cofactor_preimage_x_bits": [],
+  "rough_expected_min": 143
+ },
+ "secp160r1": {
+  "bits": 160,
+  "h": 1,
+  "half_x_bits": 157,
+  "half_x": "10095f05b8f95920fd785d5c6003ee2a7f0ca3d1",
+  "shortest_x": [
+   145,
+   "4849*G"
+  ],
+  "shortest_y": [
+   142,
+   "41811*G"
+  ],
+  "found": [],
+  "cofactor_preimage_x_bits": [],
+  "rough_expected_min": 143
+ },
+ "secp160r2": {
+  "bits": 160,
+  "h": 1,
+  "half_x_bits": 159,
+  "half_x": "4a96b5688ef573284664698e81e1510fae4e8422",
+  "shortest_x": [
+   145,
+   "12334*G"
+  ],
+  "shortest_y": [
+   143,
+   "13257*G"
+  ],
+  "found": [],
+  "cofactor_preimage_x_bits": [],
+  "rough_expected_min": 143
+ },
+ "secp192k1": {
+  "bits": 192,
+  "h": 1,
+  "half_x_bits": 187,
+  "half_x": "554123b78ce563f89a0ed9414f5aa28ad0d96d6795f9c66",
+  "shortest_x": [
+   173,
+   "G/3838"
+  ],
+  "shortest_y": [
+   176,
+   "64169*G"
+  ],
+  "found": [],
+  "cofactor_preimage_x_bits": [],
+  "rough_expected_min": 175
+ },
+ "secp224k1": {
+  "bits": 224,
+  "h": 1,
+  "half_x_bits": 166,
+  "half_x": "3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63",
+  "shortest_x": [
+   166,
+   "G/2"
+  ],
+  "shortest_y": [
+   208,
+   "34761*G"
+  ],
+  "found": [
+   "G/2: x 166 bits, y 220 bits, x=3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63"
+  ],
+  "cofactor_preimage_x_bits": [],
+  "rough_expected_min": 207
+ },
+ "secp256k1": {
+  "bits": 256,
+  "h": 1,
+  "half_x_bits": 166,
+  "half_x": "3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63",
+  "shortest_x": [
+   166,
+   "G/2"
+  ],
+  "shortest_y": [
+   238,
+   "22838*G"
+  ],
+  "found": [
+   "G/2: x 166 bits, y 254 bits, x=3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63"
+  ],
+  "cofactor_preimage_x_bits": [],
+  "rough_expected_min": 239
+ }
+}
