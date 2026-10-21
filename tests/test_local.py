@@ -42,6 +42,23 @@ class TestSandbox(unittest.TestCase):
                 local.linux_path(Path("with,comma"), "Ubuntu")
 
 
+class TestNewlineNormalization(unittest.TestCase):
+    def test_crlf_and_lone_cr_become_lf(self):
+        self.assertEqual(local.normalize_newlines(b"alice\r\nbob\r\n"), b"alice\nbob\n")
+        self.assertEqual(local.normalize_newlines(b"old\rmac\r"), b"old\nmac\n")
+
+    def test_no_carriage_return_survives(self):
+        # The real bug: rstrip only touches the final line, so interior CRs would
+        # otherwise reach the dictionary and hashcat would hash b'word\r'.
+        normalized = local.normalize_newlines(b"first\r\nsecond\r\nthird\r\n")
+        self.assertNotIn(b"\r", normalized)
+        self.assertEqual(normalized.rstrip(b"\r\n") + b"\nCerticom\n",
+                         b"first\nsecond\nthird\nCerticom\n")
+
+    def test_lf_only_input_is_unchanged(self):
+        self.assertEqual(local.normalize_newlines(b"a\nb\nc\n"), b"a\nb\nc\n")
+
+
 class TestGpuCommand(unittest.TestCase):
     def test_gpu_only_low_workload_and_per_run_state(self):
         output = Path("run with spaces")

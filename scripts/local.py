@@ -92,10 +92,21 @@ def write_json(path: Path, value: dict) -> None:
     path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
 
+def normalize_newlines(data: bytes) -> bytes:
+    r"""Collapse CRLF and lone CR line endings to LF.
+
+    A Windows checkout (git autocrlf) or a user-supplied wordlist/rule file can
+    carry CRLF. hashcat does not strip a trailing '\r' from a wordlist candidate
+    or a rule line, so without this the real candidates would hash as b'word\r'
+    while the LF-appended controls still crack -- masking every miss as a clean
+    negative. rstrip alone does not help: it only touches the final line."""
+    return data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+
+
 def prepare_run(distro: str, purpose: str, wordlist: Path | None = None,
                 rules: Path | None = None) -> tuple[Path, dict]:
-    dictionary = wordlist.read_bytes() if wordlist is not None else b"Certicom\n"
-    rule_data = rules.read_bytes() if rules is not None else b""
+    dictionary = normalize_newlines(wordlist.read_bytes()) if wordlist is not None else b"Certicom\n"
+    rule_data = normalize_newlines(rules.read_bytes()) if rules is not None else b""
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     output = ROOT / "runs" / f"{stamp}-{purpose}-{uuid.uuid4().hex[:8]}"
     output.mkdir(parents=True)
