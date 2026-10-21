@@ -1,0 +1,5 @@
+# Keep every text file LF in the working tree on all platforms. hashcat does
+# not strip a trailing CR from wordlist candidates or rule lines, so a CRLF
+# checkout (git autocrlf on Windows) would otherwise make the local GPU runner
+# hash b'word\r' while the LF-appended controls still crack, hiding real misses.
+* text=auto eol=lf

@@ -5,9 +5,10 @@ plant one, through the real search entry points (not reimplementations), and che
 
 Run:  python3 -m unittest discover -s tests -v        (stdlib only; ~1 minute)
 """
-import hashlib, io, os, struct, sys, tempfile, unittest
+import hashlib, io, json, os, struct, sys, tempfile, unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts")); sys.path.insert(0, str(ROOT / "scripts" / "k163"))
@@ -44,6 +45,15 @@ def run_main(module, strings):
     return buf.getvalue()
 
 
+def run_core_main(strings):
+    with tempfile.TemporaryDirectory() as directory:
+        with patch.object(core, "all_strings", return_value=iter(strings)), \
+             patch.object(sys, "argv", ["secg_core_search.py", "--output-dir", directory]), \
+             redirect_stdout(io.StringIO()):
+            core.main()
+        return json.loads(Path(directory, "secg-core-search.json").read_text(encoding="utf-8"))
+
+
 class TestCoreMatcher(unittest.TestCase):
     """secg_core_search: the 148-bit-core matcher and its main loop."""
 
@@ -61,19 +71,21 @@ class TestCoreMatcher(unittest.TestCase):
 
     def test_planted_sha1_found_through_search(self):
         plant_core(hashlib.sha1(b"Certicom").digest())
-        result = core.search([("decoy", b"decoy"), ("ascii:'Certicom'", b"Certicom"), ("decoy2", b"other")])
-        hits = result["hits"]
-        self.assertEqual(len(hits), 1)
-        self.assertEqual(hits[0]["label"], "ascii:'Certicom'")
-        self.assertEqual(hits[0]["algorithm"], "sha1")
-        self.assertEqual(hits[0]["suffix_hex"], "")
+        result = run_core_main([("decoy", b"decoy"), ("ascii:'Certicom'", b"Certicom"), ("decoy2", b"other")])
+        self.assertEqual(result["status"], "completed")
+        self.assertEqual(result["candidate_count"], 3)
+        self.assertEqual(len(result["hits"]), 1)
+        self.assertEqual(result["hits"][0], dict(
+            label="ascii:'Certicom'", input_hex=b"Certicom".hex(), algorithm="sha1",
+            suffix_hex="", match="d core"))
 
     def test_planted_with_counter_suffix_and_sha0(self):
         # a hit that only exists with the X9.62-style counter 2 appended as a byte, under SHA-0
         from hashes import sha0
         plant_core(sha0(b"Waterloo" + bytes([2])))
-        hits = core.search([("w", b"Waterloo")])["hits"]
-        self.assertTrue(any(h["algorithm"] == "sha0" and h["suffix_hex"] == "02" for h in hits))
+        result = run_core_main([("w", b"Waterloo")])
+        self.assertIn(dict(label="w", input_hex=b"Waterloo".hex(), algorithm="sha0",
+                           suffix_hex="02", match="d core"), result["hits"])
 
     def test_planted_reversed_reading(self):
         # digest stored byte-reversed: the 'rev' reading must catch it
