@@ -52,6 +52,18 @@ arbitrarily expanded candidate space.
 
 ## Prioritized backlog
 
+**Run order.** Before trusting any negative, run the leading-word probe
+(`scripts/hashcat_probe.py`) and regenerate targets if it shows the top-byte
+enumeration is unnecessary. Every pass carries the `Certicom`/`Certicom1`
+controls and is void unless both crack in the same pass. Then work
+cheapest-first: the Certicom dictionary with identity/append-`1` and `best64`
+(GPU-02, startup-bound to seconds), larger wordlists with bounded rule
+expansions (GPU-03, seconds to minutes), constrained date/counter and short
+alphanumeric masks (GPU-04), and only after GPU-01's measured budget the
+length-8 printable and length-10 alphanumeric masks. `scripts/local.py` runs the
+dictionary/rule tiers end to end; masks are explicit hashcat commands that must
+reproduce the same controls, full-target verification, and `run.json` logging.
+
 ### GPU-01: Measure representative sustained throughput
 
 - [ ] Benchmark both algorithms against the actual research target lists and
@@ -116,16 +128,28 @@ runner support plus controls through the actual generation path.
 **Not implemented by the current runner.** A raw hashcat mask invocation alone
 does not provide the existing workflow's controls and verification.
 
-These broad spaces are not automatically "hours on a laptop":
+These broad spaces are not automatically "hours on a laptop". The mask ladder
+below, cheapest first, shows why GPU-01's measurement gates the large runs:
 
-| Candidate space | Candidates, all stated lengths | Illustrative time at 1 billion candidates/s |
-|---|---:|---:|
-| 95 printable ASCII characters, lengths 1..8 | 6,704,780,954,517,120 | 77.60 days |
-| 36 lowercase/digit characters, lengths 1..10 | 3,760,620,109,779,060 | 43.53 days |
+| Candidate space | Candidates, all stated lengths | at 1e9/s | at 1e10/s | at 5e10/s |
+|---|---:|---:|---:|---:|
+| 26 lowercase, lengths 1..8 | 217,180,147,158 | 3.6 min | 22 s | 4 s |
+| 36 lowercase/digit, lengths 1..8 | 2,901,713,047,668 | 48 min | 4.8 min | 58 s |
+| 95 printable ASCII, lengths 1..7 | 70,576,641,626,495 | 19.6 h | 2.0 h | 24 min |
+| 95 printable ASCII, lengths 1..8 | 6,704,780,954,517,120 | 77.6 days | 7.8 days | 37 h |
+| 36 lowercase/digit, lengths 1..10 | 3,760,620,109,779,060 | 43.5 days | 4.4 days | 21 h |
 
-The rates in this table are hypothetical, **not measurements of the Iris Xe**.
-Each row is for one algorithm before extra encodings, hash constructions, or
-input transforms. Use `candidate_count / measured_rate` for scheduling.
+The three rates are hypothetical reference points, **not measurements of the
+Iris Xe**: 1e9/s a conservative integrated-GPU guess, 1e10/s a strong discrete
+GPU, 5e10/s an RTX 4090 class card. The §3 "hours" framing in
+[`notes/hash-angle.md`](notes/hash-angle.md) assumed roughly a 1e12/s rig, which
+this laptop is not. Each row is for one algorithm before extra encodings, hash
+constructions, or input transforms. Replace these columns with GPU-01's measured
+Iris Xe rate and schedule from `candidate_count / measured_rate`.
+
+Dictionary and rule passes (GPU-02, GPU-03) are not in this table: at these
+keyspaces they are startup-bound (kernel autotune and list load), seconds to a
+few minutes, so they run first regardless of rate.
 
 ### GPU-05: Expand byte encodings, counters, and output readings
 
@@ -179,6 +203,9 @@ For every heavy pass, save the exact command, hardware/driver/hashcat versions,
 target/input/rule hashes, candidate-generation definition, shard or restore
 position, runtime limit, actual progress, rejected candidates, control
 recoveries, full-match verification, partial matches, and exit status.
+`scripts/local.py` already records these in each run's `run.json` for
+dictionary/rule passes; a manual mask or hybrid run must emit the same fields,
+in its own `run.json` or equivalent, so its negative is reproducible.
 
 - A pass is negative only for its precisely specified, exhausted space after
   its controls pass. Runtime limits, interruption, missing controls, or
