@@ -67,7 +67,7 @@ A reasonable split: V1 covers everything mechanical (short strings, dates, names
 
 1. `scripts/make_targets.py` — emit the 3 × 4096 SHA-1 target list for the secp core and the 4-target MD5 list for K-163, in hashcat format.
 2. `wordlists/certicom.txt` — the Certicom-era base dictionary (names, orgs, curve names in all spellings, draft dates 1998–2000, ECC Challenge names, the r-curve SEED ASCII, the curves' own parameters as strings).
-3. A hashcat run plan with estimated times per attack class, and a results log format.
+3. A hashcat run plan with estimated times per attack class, and a results log format. **Folded into** [`GPU-Experiments-ToDo.md`](../GPU-Experiments-ToDo.md) (run order, GPU-01, and the mask time-estimate table); per-run logging is implemented by `scripts/local.py`'s `run.json`.
 4. (Optional) `scripts/sha1_steps.py` — a small step-level SHA-1 with forward and backward step functions, for confirming any hit's internal states and for teaching the point in §2 to the next reader.
 
 ## 5. hashcat operational notes (20 Oct, first GPU run on an A18 Pro / Metal)
