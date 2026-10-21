@@ -69,3 +69,13 @@ A reasonable split: V1 covers everything mechanical (short strings, dates, names
 2. `wordlists/certicom.txt` — the Certicom-era base dictionary (names, orgs, curve names in all spellings, draft dates 1998–2000, ECC Challenge names, the r-curve SEED ASCII, the curves' own parameters as strings).
 3. A hashcat run plan with estimated times per attack class, and a results log format.
 4. (Optional) `scripts/sha1_steps.py` — a small step-level SHA-1 with forward and backward step functions, for confirming any hit's internal states and for teaching the point in §2 to the next reader.
+
+## 5. hashcat operational notes (20 Oct, first GPU run on an A18 Pro / Metal)
+
+Verified end to end: `make_targets.py --plant Certicom Certicom1` then `hashcat -m 100 -a 0`. Metal works once OpenCL is excluded (`--backend-ignore-opencl`; the OpenCL device aborted during init on this machine, Metal did not). The planted `Certicom` cracked immediately, confirming target format, mode, dictionary ingest and kernel.
+
+Two findings to carry into every run:
+
+1. **Drop `-O` for dictionary passes.** The optimized kernel caps candidates at 31 bytes and rejected 148 of the 6,939 wordlist entries; the pure kernel covers all lengths (0 rejected) and was faster here anyway at this tiny keyspace. Keep `-O` only for the length-≤8 mask attacks, where every candidate is short by construction.
+
+2. **"290 unique digests" out of 12,290 is a hash-table reduction on the leading word, not a bug in our list.** The 12,288 target digests are all distinct (`sort -u` confirms); hashcat collapses them to 288 (+2 planted) because it keys its SHA-1 hash table on words 1..4 and treats the leading 32-bit word (register `a`) specially — `distinct(digest_bytes[4:20]) == 288` exactly. Our unknown top byte is enumerated into that leading word, so whether the 256-way enumeration is load-bearing depends on whether hashcat re-confirms the leading word on a bucket hit. `scripts/hashcat_probe.py` decides it: it writes SHA-1("Certicom") with the leading word overwritten by `deadbeef`, and a run against `wordlists/certicom.txt` either cracks it (hashcat ignores the leading word → shrink the list 256×, and the search is correctly blind to the top byte) or exhausts (hashcat confirms the full digest → keep the enumeration). Run this before trusting a null result from the mask attacks. The planted control must crack regardless.

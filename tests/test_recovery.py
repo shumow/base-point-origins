@@ -69,7 +69,7 @@ class TestCoreMatcher(unittest.TestCase):
             self.assertIsNotNone(core.check(v.to_bytes(20, "big")))
         self.assertIsNone(core.check(hashlib.sha1(b"not it").digest()))
 
-    def test_planted_sha1_found_through_main(self):
+    def test_planted_sha1_found_through_search(self):
         plant_core(hashlib.sha1(b"Certicom").digest())
         result = run_core_main([("decoy", b"decoy"), ("ascii:'Certicom'", b"Certicom"), ("decoy2", b"other")])
         self.assertEqual(result["status"], "completed")

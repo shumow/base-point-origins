@@ -106,6 +106,9 @@ Nothing hash-sized at subgroup multiples ≤ 2¹⁶. FreeLIP recipe with every s
 ## 4c. Tests
 `tests/test_recovery.py` (stdlib `unittest`, ~10 s): plants a known answer through each real search entry point — the core matcher and its main loop (as-is, byte-reversed, counter-suffixed SHA-0, top-byte/last-nibble-insensitive), the K-163 matcher (MD5, low-128-of-SHA-1, masked top bits), `wordlist_search` (a punctuation variant), `make_targets` (every completion of the core in all three readings is a target), `freelip_sweep` (reproduces P-192 from seed 20000; finds a point planted on P-256 with a non-standard discard), `nibble_rules` (finds a planted first-on-curve rule and confirms the real nibbles are not one), the EC arithmetic (recomputes all four half-generator constants from the published G), and `sha1_steps`. Run it before trusting any new negative result, and add a planted case for any new search.
 
+## 4d. Next analytic task: MD4/MD5 meet-in-the-middle on K-163
+`notes/md-mitm.md` — Dan's design (voice, 20 Oct) for a last-block MITM preimage on the 126-bit K-163 value, exploiting that MD4/MD5 have no message expansion so known-padding words stay known. Test-first: plant-and-recover control (`tests/test_md_mitm.py`) before the solver is trusted. Honest limit recorded there: the candidate-free back-tail is only a few steps for a short string; the win is the MITM constraint plus the cheap filter. Not yet built.
+
 ## 5. Repository map
 
 ```
@@ -119,6 +122,8 @@ scripts/secg_core_search.py core-matched dictionary search (STRINGS=strings|stri
 scripts/nibble_rules.py    brute-force of last-nibble acceptance rules
 scripts/freelip_sweep.py   FreeLIP zrandom recipe x every small seed on P-224/256/384/521, secp160k1
 tests/test_recovery.py     positive controls for every search (§4c)
+scripts/hashcat_probe.py   decides whether hashcat confirms the leading digest word (hash-angle §5)
+notes/md-mitm.md           MD4/MD5 meet-in-the-middle design for K-163 (§4d; not yet built)
 scripts/sha1_steps.py      step-level SHA-1, forward + backward, self-tested (hash-angle §2a)
 scripts/test_secg.py       regression tests for the SEC 2 scan and core search
 scripts/make_targets.py    hashcat target lists (12,288 SHA-1 for the secp core; 4 MD5 for K-163)
