@@ -1,0 +1,50 @@
+1. x(G/2) on the secp*k1 curves
+  ok   secp160k1: 48ce563f89a0ed9414f5aa28ad0d96d6795f9c62 (159 of 160 bits)
+  ok   secp192k1: 554123b78ce563f89a0ed9414f5aa28ad0d96d6795f9c66 (187 of 192 bits)
+  ok   secp224k1: 3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63 (166 of 224 bits)
+  ok   secp256k1: 3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63 (166 of 256 bits)
+2. the shared core
+  ok   bits 4..155 (152 bits, 38 nibbles) agree on all four: 8ce563f89a0ed9414f5aa28ad0d96d6795f9c6
+  ok   top nibble of the 160-bit block is 4 (160k1) or 7 (others)
+  ok   last nibbles 2, 6, 3, 3
+  ok   224/256k1 value - 160k1 value = 0x3b3 * 2^156 + 1  (record.md 7.3.2 says 2^152: typo)
+  ok   192k1 value - 224/256k1 value = 0x55412 * 2^168 + 3  (record.md 7.3.2 says 2^172: typo)
+     2019 JtR list: top and bottom nibble varied -> 16*16 = 256 digests, matches a 152-bit core;
+     repo make_targets.py: top byte and bottom nibble -> 4096 per reading, one nibble looser (superset).
+3. 'core + small counter, keep the first x that lifts' (H3)
+     secp160k1 low 4 bits: actual   2, counting up first valid   0 (first few [0, 1, 2, 3, 6]), counting down first valid  15
+  ok   secp160k1: count-up over the low 4 bits does not pick the actual value
+     secp160k1 low 6 bits: actual  34, counting up first valid   1 (first few [1, 3, 5, 6, 8]), counting down first valid  63
+  ok   secp160k1: count-up over the low 6 bits does not pick the actual value
+     secp160k1 low 8 bits: actual  98, counting up first valid   1 (first few [1, 2, 4, 6, 8]), counting down first valid 254
+  ok   secp160k1: count-up over the low 8 bits does not pick the actual value
+     secp160k1 top nibble of the 160-bit block: actual 4, nibbles that lift [0, 2, 3, 4, 8, 10, 11, 13, 14]
+     secp192k1 low 4 bits: actual   6, counting up first valid   0 (first few [0, 1, 6, 7, 9]), counting down first valid  14
+  ok   secp192k1: count-up over the low 4 bits does not pick the actual value
+     secp192k1 low 6 bits: actual  38, counting up first valid   1 (first few [1, 2, 3, 5, 6]), counting down first valid  62
+  ok   secp192k1: count-up over the low 6 bits does not pick the actual value
+     secp192k1 low 8 bits: actual 102, counting up first valid   1 (first few [1, 3, 4, 8, 11]), counting down first valid 254
+  ok   secp192k1: count-up over the low 8 bits does not pick the actual value
+     secp192k1 top nibble of the 160-bit block: actual 7, nibbles that lift [1, 2, 3, 7, 8, 10, 11, 15]
+     secp224k1 low 4 bits: actual   3, counting up first valid   2 (first few [2, 3, 5, 8, 10]), counting down first valid  15
+  ok   secp224k1: count-up over the low 4 bits does not pick the actual value
+     secp224k1 low 6 bits: actual  35, counting up first valid   0 (first few [0, 2, 3, 6, 9]), counting down first valid  60
+  ok   secp224k1: count-up over the low 6 bits does not pick the actual value
+     secp224k1 low 8 bits: actual  99, counting up first valid   0 (first few [0, 4, 6, 9, 12]), counting down first valid 255
+  ok   secp224k1: count-up over the low 8 bits does not pick the actual value
+     secp224k1 top nibble of the 160-bit block: actual 7, nibbles that lift [0, 2, 3, 4, 7, 9, 12, 13, 15]
+     secp256k1 low 4 bits: actual   3, counting up first valid   1 (first few [1, 3, 4, 8, 10]), counting down first valid  15
+  ok   secp256k1: count-up over the low 4 bits does not pick the actual value
+     secp256k1 low 6 bits: actual  35, counting up first valid   1 (first few [1, 4, 7, 8, 9]), counting down first valid  62
+  ok   secp256k1: count-up over the low 6 bits does not pick the actual value
+     secp256k1 low 8 bits: actual  99, counting up first valid   2 (first few [2, 4, 5, 7, 8]), counting down first valid 255
+  ok   secp256k1: count-up over the low 8 bits does not pick the actual value
+     secp256k1 top nibble of the 160-bit block: actual 7, nibbles that lift [1, 3, 4, 6, 7, 9, 10, 11, 12]
+4. secp256r1 control
+  ok   x(G/2) on secp256r1 has 254 bits: 2afa386b3f2bdcdb83f4d83f8fa3874d7b74dcb454bd644fdd6bf3d1f2da8db6
+5. sect163k1 / K-163
+  ok   x(G/2) = 23e21d6019e1211f6bd47ec180256e97 (126 of 163 bits)
+6. the secp256k1 field prime via CM (Scholl, 27 Oct 2019)
+  ok   the only (p, prime order) pair with 2^256-2^32-977 <= p < 2^256-2^32 is secp256k1's (p, n)
+
+ALL OK
