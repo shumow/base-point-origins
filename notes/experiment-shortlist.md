@@ -41,6 +41,14 @@ then the two substantial builds (4–5).
 
 ## 1. Nothing-up-my-sleeve / structured non-semantic corpus
 
+**Status: done 2026-10-22 — negative.** `scripts/nothing_up_my_sleeve.py` (controls in
+`tests/test_nothing_up_my_sleeve.py`, result in `results/nothing-up-my-sleeve.json`): a frozen corpus of
+20 direct sources and 66 hash candidates (digits of pi/e/ln2/sqrt2/sqrt3/sqrt5/phi, the SHA-1 and MD5
+IVs and SHA-1 round constants, the secp160r coordinates and SEEDs, and the k1 field primes) found no
+match for the secp core or the K-163 value, by direct substring/reversed reading or as a hash under the
+existing matchers. Planted controls in all three paths pass. This is a bounded negative over exactly that
+frozen set; widen the corpus (more constants, offsets, reductions) to extend it.
+
 **What.** Test whether the secp\*k1 core or the K-163 value is the hash, or a
 simple function, of a *famous* value rather than a human sentence: digits of pi
 and e, the SHA-1 and MD5 initialization vectors, other curves' parameters and
