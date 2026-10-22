@@ -1,0 +1,10 @@
+{
+ "experiment": "nothing-up-my-sleeve",
+ "corpus_sha256": "6ca6e9613c7b2705b8980a2e0134bf8c0b724fcae4329eb1a425e31795d560b5",
+ "direct_sources": 20,
+ "hash_candidates": 66,
+ "core_hash_evaluations": 66,
+ "direct_hits": [],
+ "core_hash_hits": [],
+ "k163_hash_hits": []
+}

@@ -41,6 +41,14 @@ then the two substantial builds (4–5).
 
 ## 1. Nothing-up-my-sleeve / structured non-semantic corpus
 
+**Status: done 2026-10-22 — negative.** `scripts/nothing_up_my_sleeve.py` (controls in
+`tests/test_nothing_up_my_sleeve.py`, result in `results/nothing-up-my-sleeve.json`): a frozen corpus of
+20 direct sources and 66 hash candidates (digits of pi/e/ln2/sqrt2/sqrt3/sqrt5/phi, the SHA-1 and MD5
+IVs and SHA-1 round constants, the secp160r coordinates and SEEDs, and the k1 field primes) found no
+match for the secp core or the K-163 value, by direct substring/reversed reading or as a hash under the
+existing matchers. Planted controls in all three paths pass. This is a bounded negative over exactly that
+frozen set; widen the corpus (more constants, offsets, reductions) to extend it.
+
 **What.** Test whether the secp\*k1 core or the K-163 value is the hash, or a
 simple function, of a *famous* value rather than a human sentence: digits of pi
 and e, the SHA-1 and MD5 initialization vectors, other curves' parameters and
@@ -59,6 +67,16 @@ non-semantic. A hit here would essentially be the whole answer.
   running through code that already works and is already benchmarked.
 
 ## 2. Top-byte and expansion stories (analytic)
+
+**Status: done 2026-10-22 — negative.** `scripts/top_byte_analysis.py` (controls in
+`tests/test_top_byte_analysis.py`, result in `results/top-byte-analysis.json`): the byte above the shared
+core is 48 on secp160k1 and 78 on the other three (difference exactly 0x30), and 192's prefix ends in the
+3b78 shared by 224/256. No non-trivial single-value mod-p reduction relates the curves (only the known
+secp224k1 = secp256k1 identity), and the observed top byte, while always on-curve, is the smallest
+on-curve completion for none of them. So the high bits are not explained by a counter, a single mod-p
+reduction, or a smallest-on-curve rule. The shared-prefix hunt (item 4) was already done by
+`secg_scan.py`. The prefix's origin stays open; next are the hash/expansion stories (item 3b/3c) and the
+archival route.
 
 **What.** The `48` vs `78` disagreement on the 160-bit curve and the shared
 `3b78` on the larger curves are the sharpest structural clues (`plan.md` items
