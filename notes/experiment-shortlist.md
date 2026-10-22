@@ -68,6 +68,16 @@ non-semantic. A hit here would essentially be the whole answer.
 
 ## 2. Top-byte and expansion stories (analytic)
 
+**Status: done 2026-10-22 — negative.** `scripts/top_byte_analysis.py` (controls in
+`tests/test_top_byte_analysis.py`, result in `results/top-byte-analysis.json`): the byte above the shared
+core is 48 on secp160k1 and 78 on the other three (difference exactly 0x30), and 192's prefix ends in the
+3b78 shared by 224/256. No non-trivial single-value mod-p reduction relates the curves (only the known
+secp224k1 = secp256k1 identity), and the observed top byte, while always on-curve, is the smallest
+on-curve completion for none of them. So the high bits are not explained by a counter, a single mod-p
+reduction, or a smallest-on-curve rule. The shared-prefix hunt (item 4) was already done by
+`secg_scan.py`. The prefix's origin stays open; next are the hash/expansion stories (item 3b/3c) and the
+archival route.
+
 **What.** The `48` vs `78` disagreement on the 160-bit curve and the shared
 `3b78` on the larger curves are the sharpest structural clues (`plan.md` items
 3–4). For each model — a counter, a second digest, the X9.62 seed-to-field

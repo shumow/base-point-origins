@@ -1,0 +1,88 @@
+{
+ "experiment": "top-byte-analysis",
+ "half_x": {
+  "secp160k1": "48ce563f89a0ed9414f5aa28ad0d96d6795f9c62",
+  "secp192k1": "554123b78ce563f89a0ed9414f5aa28ad0d96d6795f9c66",
+  "secp224k1": "3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63",
+  "secp256k1": "3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63"
+ },
+ "decomposition": {
+  "secp160k1": {
+   "x_hex": "48ce563f89a0ed9414f5aa28ad0d96d6795f9c62",
+   "core_matches": true,
+   "prefix_above_core_hex": "48",
+   "byte_above_core_hex": "48",
+   "low_nibble": 2
+  },
+  "secp192k1": {
+   "x_hex": "554123b78ce563f89a0ed9414f5aa28ad0d96d6795f9c66",
+   "core_matches": true,
+   "prefix_above_core_hex": "554123b78",
+   "byte_above_core_hex": "78",
+   "low_nibble": 6
+  },
+  "secp224k1": {
+   "x_hex": "3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63",
+   "core_matches": true,
+   "prefix_above_core_hex": "3b78",
+   "byte_above_core_hex": "78",
+   "low_nibble": 3
+  },
+  "secp256k1": {
+   "x_hex": "3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63",
+   "core_matches": true,
+   "prefix_above_core_hex": "3b78",
+   "byte_above_core_hex": "78",
+   "low_nibble": 3
+  }
+ },
+ "core_shared_by_all": true,
+ "byte_above_core": {
+  "secp160k1": "48",
+  "secp192k1": "78",
+  "secp224k1": "78",
+  "secp256k1": "78"
+ },
+ "byte_above_core_diff_192_minus_160": "0x30",
+ "prefix_3b78_shared_by_192_224_256": true,
+ "reduction_matches": [
+  {
+   "source_reading": "secp224k1:full",
+   "reduced_mod": "secp256k1",
+   "equals_half_x_of": "secp256k1",
+   "quotient": 0
+  },
+  {
+   "source_reading": "secp256k1:full",
+   "reduced_mod": "secp224k1",
+   "equals_half_x_of": "secp224k1",
+   "quotient": 0
+  }
+ ],
+ "top_byte_on_curve": {
+  "secp160k1": {
+   "observed_byte": "48",
+   "smallest_on_curve_byte": "04",
+   "observed_is_on_curve": true,
+   "observed_is_smallest": false
+  },
+  "secp192k1": {
+   "observed_byte": "78",
+   "smallest_on_curve_byte": "00",
+   "observed_is_on_curve": true,
+   "observed_is_smallest": false
+  },
+  "secp224k1": {
+   "observed_byte": "78",
+   "smallest_on_curve_byte": "01",
+   "observed_is_on_curve": true,
+   "observed_is_smallest": false
+  },
+  "secp256k1": {
+   "observed_byte": "78",
+   "smallest_on_curve_byte": "01",
+   "observed_is_on_curve": true,
+   "observed_is_smallest": false
+  }
+ }
+}
