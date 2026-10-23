@@ -148,17 +148,53 @@ retrieved from this session. This matches the earlier note in
 registries only"). The pass is set up here; the retrieval is a hand-drop or a
 networked session, exactly as the Stevens papers and the rump slides were handled.
 
-## Next actions (for whoever has network)
+## Remaining fetch targets (checklist for a networked session or hand-drop)
 
-1. Pull the **1999 "Recommended Elliptic Curve Domain Parameters" draft (GEC 1?)**
-   and the **Nov 1999 WTLS specification**, and grep their parameter tables for
-   the secp\*k1 / sect\*k1 Gx values above; record whether each base point is
-   present and identical. These are the two most informative fetches; GEC 2 is a
-   distant third.
-2. Pull the **earliest Wayback secg.org** capture and any SEC 2 draft < v1.0; diff
-   every secp\*k1 G against the baseline.
-3. Read **SEC 1 v2.0 §"Verifiably Random Curves and Base Point Generators"** and
-   **ANSI X9.62:1998**'s base-point clause; quote any sentence bearing on how a
-   base point (not the curve) is produced.
-4. Drop retrieved PDFs under `references/archival/` with a one-line provenance each
-   (source URL, capture date), and log the diff result back into this file.
+None of these is reachable from this sandbox (see "Network constraint"): WebFetch
+resolves only GitHub and package-registry hosts. Each needs a networked session or
+a hand-drop into `references/archival/` (see `references/archival/README.md`).
+**Already done — do not re-fetch:** SEC 2 v1.0 (2000-09-20) and v2.0 (2010) params
+(verified in-repo, HANDOFF §6); std-curves (vendored + cross-checked, 0 mismatch);
+DiSSECT (checked, no derivation). The open question is strictly **before
+2000-09-20**: a 1999 or earlier table with a *different* G dates the constant; any
+document that *states the derivation* ends the search.
+
+Ordered by how decisively each could settle it:
+
+1. [ ] **Certicom 1999 draft "Recommended Elliptic Curve Domain Parameters"** (likely **GEC 1**). Try `http://rfc.nop.hu/secg/gec1.pdf` (next to gec2.pdf); the citation behind it is `https://grouper.ieee.org/groups/1904/4/email/pdf7kia4jRaeI.pdf`. *Extract:* the full secp\*k1 / sect\*k1 generator tables. *Top target* — the pre-SEC-2 Certicom curve tables are the most likely place today's G first appears or differs.
+2. [ ] **WAP WTLS spec, 1999-11-05** (WAP-199, `SPEC-WTLS-19991105`). `https://cdimage.debian.org/mirror/archive/ftp.sunet.se/pub/security/docs/PCA/TLS/SPEC-WTLS-19991105.pdf`; also the Open Mobile Alliance WAP archive. *Extract:* curve appendix — curve 3 = sect163k1 (K-163), 10 = sect233k1, and 7 (secp160r1 **or** r2 — settle finding 3 by comparing curve 7's p and G to both). Ten months before SEC 2; dates K-163's short half and the secp160r pair of §2.2.
+3. [ ] **ANSI X9.62:1998** base-point generation clause, and its **IEEE P1363** working-draft form (`grouper.ieee.org/groups/1363/`). *Extract:* whether the standard specifies *how a base point* (not just the curve) is produced — the method SEC 1 defers to. Paywalled; seek the P1363 draft.
+4. [ ] **Earliest Wayback captures of secg.org**, circa/pre 2000-09-20, for a SEC 2 draft < v1.0. Recipe: earliest capture `https://web.archive.org/web/0/http://www.secg.org/`; list captures `https://web.archive.org/cdx/search/cdx?url=secg.org*&collapse=urlkey&output=text&filter=original:.*[Ss][Ee][Cc]2.*`; append `id_` to a timestamp for the raw PDF. *Extract:* diff every secp\*k1 G against the baseline.
+5. [ ] **GEC 2: Test Vectors for SEC 1**, Certicom v0.3 Sept 1999. `http://rfc.nop.hu/secg/gec2.pdf`. *Extract:* any worked base-point example (secp160r1 ECDSA vectors); not expected to table the k-curves — a distant lead.
+6. [ ] **SEC 1 v2.0 §"Verifiably Random Curves and Base Point Generators"**. `https://www.secg.org/sec1-v2.pdf` (mobilefish mirror too). *Extract:* quote any sentence on k-curve base-point generation (the section is written for the r-curves; confirm it says nothing binding the k-curves).
+7. [ ] **SEC 2 v1.5 working draft, 2005-09-27**. `http://rfc.nop.hu/secg/sec2.pdf`. *Extract:* diff any base-point note against v1.0/v2.0 — lowest priority (post-dates v1.0).
+
+**Grep targets** (published generators; a draft table that matches dates that G,
+a table that differs is an earlier form). Generated from this repo's verified
+parameters, 2026-10-23:
+
+```
+# prime secp*k1
+secp160k1 Gx=3b4c382ce37aa192a4019e763036f4f5dd4d7ebb
+secp192k1 Gx=db4ff10ec057e9ae26b07d0280b7f4341da5d1b1eae06c7d
+secp224k1 Gx=a1455b334df099df30fc28a169a467e9e47075a90f7e650eb6b7a45c
+secp256k1 Gx=79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
+# secp160r pair (§2.2): shared 92-bit prefix between r1's G and r2's x(G/2)
+secp160r1 Gx=4a96b5688ef573284664698968c38bb913cbfc82
+secp160r2 Gx=52dcb034293a117e1f4ff11b30f7199d3144ce6d
+# sect*k1  (WTLS: wtls3=sect163k1, wtls10=sect233k1; X9.63: ansit*k1)
+sect163k1 Gx=02fe13c0537bbc11acaa07d793de4e6d5e5c94eee8
+sect233k1 Gx=017232ba853a7e731af129f22ff4149563a419c26bf50a4c9d6eefad6126
+sect239k1 Gx=29a0b6a887a983e9730988a68727a8b2d126c44cc2cc7b2a6555193035dc
+sect283k1 Gx=0503213f78ca44883f1a3b8162f188e553cd265f23c1567a16876913b0c2ac2458492836
+sect409k1 Gx=0060f05f658f49c1ad3ab1890f7184210efd0987e307c84c27accfb8f9f67cc2c460189eb5aaaa62ee222eb1b35540cfe9023746
+sect571k1 Gx=026eb7a859923fbc82189631f8103fe4ac9ca2970012d5d46024804801841ca44370958493b205e647da304db4ceb08cbbd1ba39494776fb988b47174dca88c7e2945283a01c8972
+```
+
+Base points are often tabled compressed, as `02`/`03` ‖ Gx; grep the Gx hex
+(case-insensitively, spaces/newlines stripped) rather than the whole point.
+
+**When a PDF is retrieved:** drop it under `references/archival/` with a one-line
+provenance (source URL, date/capture), diff its tables against the grep targets,
+and log the result — present/identical, present/different (give the value), or a
+stated derivation — back into this file under a dated "Findings" entry.
