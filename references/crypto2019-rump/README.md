@@ -1,16 +1,25 @@
 # The 2019–2020 investigation: what survives, and what it adds to this repository
 
-*Added 2026-10-22 from two mailbox surveys Dan ran on 22 Oct 2026 (Microsoft work account and OneDrive; personal Gmail). Collaborators on the original work: Nadia Heninger, Travis Scholl; input from Dan Brown and Antonio Sanso. Every number quoted below was re-checked in this repository by `scripts/verify_crypto2019.py` (output in `results/verify-crypto2019.txt`).*
+*Added 2026-10-22 from two mailbox surveys Dan ran on 22 Oct 2026 (Microsoft work account and OneDrive; personal Gmail). Collaborators on the original work: Nadia Heninger, Travis Scholl; input from Dan Brown and Antonio Sanso. Selected arithmetic is reproduced below; the chronology and historical search coverage remain mailbox-survey reports, not facts certified by a numerical script.*
 
 ## Files
 
 | File | What it is | Provenance |
 |---|---|---|
 | `microsoft-mailbox-survey.md` | Timeline (Mar 2019 – Jun 2020), hypotheses H1–H7 with status, list of recoverable artifacts, next steps | Survey of the Microsoft mailbox and OneDrive, 22 Oct 2026 |
-| `gmail-survey.md` (+ the original `gmail-survey.rtf`) | Mostly negative search of the personal Gmail; the useful part is three message links with attachments nobody has opened yet (§Leads) | Survey of shumow@gmail.com, 22 Oct 2026; Markdown made with pandoc |
-| `halve_generators.sage` | **Oct 2026 reconstruction**, not the 2019 code: halving on the four secp\*k1 curves, Dan Brown's counter test, the P-256 control, sect163k1, and Travis Scholl's CM derivation of the secp256k1 prime | Written during the Microsoft survey; "not yet run in Sage" per its header. Everything it asserts now passes in pure Python here |
+| `gmail-survey.md` (+ the RTF survey) | Mostly negative search of the personal mailbox; attachment leads identified by date, subject and filename | Survey, 22 Oct 2026; private mailbox links redacted in both formats |
+| `halve_generators.sage` | **Oct 2026 reconstruction**, not the 2019 code: halving on the four secp\*k1 curves, direct low-bit counter tests, the P-256 control, sect163k1, and the CM calculation | Executed in Sage with explicit proof-enabled primality; output in `../../results/verify-crypto2019-sage.txt` |
 
-**Not here, on purpose.** The rump-session slide deck (`secp256k1_rump_slides_Crypto2019.pdf`) as it came out of the Microsoft mailbox is a Microsoft IRM wrapper: one visible page saying "This PDF file is protected", the real deck encrypted inside as `MicrosoftIRMServices Protected PDF.pdf`, sensitivity label *Highly Confidential \ Microsoft FTE*. It cannot be opened outside the tenant and it does not belong in a public repository. SHA-256 of that wrapped file, for identification: `3ff95451cc40a59cb0340bfd7f57af939b0f2fb04cf43647f2f2fb702ff39b5e`. The clean copy is the `secp256k1.pdf` attached to Nadia's Gmail message of 20 Aug 2019, 00:35 Pacific, in the thread *allthekeys* (link in `gmail-survey.md`). Drop it in this folder as `secp256k1_rump_slides_Crypto2019.pdf`.
+**Slides reviewed, not redistributed.** The original mailbox export was a rights-protected wrapper and was not added. Dan supplied a readable 13-page replacement on 22 Oct 2026, titled `48ce563f89a0ed9414f5aa28ad0d96d6795f9c62`, by Nadia Heninger, Travis Scholl and Dan Shumow, dated 19 Aug 2019. Its SHA-256 is `af0bab53380f6d4ea493ec8950a4b2ea4f8ba7f3bf352231fe3392c488ba9afc`. Page numbers below are PDF pages, including overlay pages. The attachment was reviewed locally, not copied into this repository; reading access is not treated as permission to redistribute it.
+
+## Evidence levels
+
+- **Directly checked in the slides:** page 7 lists the four half-generator coordinates; page 11 labels SHA-1 and top/bottom-nibble changes as hypotheses; page 12 explicitly does not claim a backdoor; page 13 asks former Certicom employees and GPU volunteers for help.
+- **Historical measurement, not revalidated:** page 3 reports that 99% of repeated Bitcoin ECDSA nonces in the 2019 investigation were `(n-1)/2`; page 5 links the short value to cheaper transactions. The dataset and measurement method are not supplied here. This is not a claim about today's blockchain.
+- **Mailbox-survey reports:** the timeline, John the Ripper run, June 2020 follow-up, and original code locations. This review did not inspect the original messages, private repository or Slack archive.
+- **Modern arithmetic:** the Python and Sage reconstructions check selected mathematical claims. They do not establish which algorithm the designers actually ran.
+
+Private mailbox deep links have been removed from both survey formats; dates, subjects and attachment names remain as retrieval cues for Dan. This does not remove links from earlier Git history. Before public redistribution of further correspondence, quotations or attachments, confirm the relevant permissions; the surveys are not a substitute for the original sources.
 
 Also not mirrored: Travis Scholl's parameter gist (NIST.sage with the SHA-1 seed check, SEC.sage, Curve25519.sage), https://gist.github.com/tscholl2/412b6c8cc44c84debbe08c0cca98b42a — the sandbox could not fetch gist raw files.
 
@@ -20,16 +29,30 @@ Also not mirrored: Travis Scholl's parameter gist (NIST.sage with the SHA-1 seed
 |---|---|---|
 | x(G/2) is short on secp192k1/224k1/256k1 and *identical* on 224k1 and 256k1; the r-curves are full-size | Travis Scholl → Nadia, 24 Mar 2019, after her AMS Hawaii talk; Nadia had the 256k1 case from Bitcoin | Reproduced independently, `notes/record.md` §7.2 |
 | secp160k1 (SEC 2 v1.0 only) gives the bare 160-bit value `48ce563f…9c62`; that became the talk's title | Dan + Nadia at Crypto, 18 Aug 2019 | Reproduced, §7.2 |
-| How it was noticed: 99% of *repeated* Bitcoin ECDSA nonces are (n−1)/2, because the short r makes the transaction cheaper (slides 2–3) | Rump talk, 20 Aug 2019 | **New to the repo.** This is the practical hook for any write-up and the reason the observation exists at all |
-| SHA-1 preimage search with John the Ripper over the 256 variants of the 160-bit value with top and bottom nibble changed: **nothing** | Nadia, 19–20 Aug 2019 ("Hash candidates") | **New to the repo** as a logged negative. Wordlist unknown (ask Nadia). The repo's three pure-Python passes (~70 M evaluations, HANDOFF §3) and the hashcat V1 plan are its successor |
-| Dan Brown's theory: a 160-bit value plus a small counter in the low bits, keep the first x that lifts to a point | Forwarded by Travis, 19–20 Aug 2019 | Ruled out in its naive form by the Oct 2026 survey (low 4 and 6 bits); `verify_crypto2019.py` §3 re-does it for 4, 6 and 8 bits, counting up and down, and for the *top* nibble. The repo's `nibble_rules.py` (~11,500 rules, record §7.3.3) is the broader version |
-| The curves (not G) come from the CM method: j = 0, D = −3; p = 2²⁵⁶ − 2³² − 977 is the largest prime below 2²⁵⁶ − 2³² − 1 for which some y² = x³ + b has prime order, and that order is n | Antonio Sanso (18 Oct 2019), Dan Brown's history, Travis Scholl's Sage (27 Oct 2019) | **Verified here** (`verify_crypto2019.py` §6: five primes in the window, one with a prime-order twist). About the curve, not the base point; the write-up can say "the curve is explained, the generator is not" |
+| The 2019 talk reports that 99% of *repeated* Bitcoin ECDSA nonces in its investigation were (n−1)/2 | Rump slides, PDF pages 3 and 5 | Directly confirmed as a historical statement in the slides, not independently remeasured |
+| SHA-1 preimage search with John the Ripper over 256 top/bottom-nibble variants: reported no match | Mailbox survey, Nadia, 19–20 Aug 2019 ("Hash candidates") | Historical negative with **unknown candidate coverage**: wordlist, rules, input encodings, counts and completion status are not established. Do not infer defaults or exclude any named corpus from a new hunt |
+| Dan Brown's theory: a 160-bit value plus a small counter in the low bits, keep the first x that lifts to a point | Mailbox survey, forwarded by Travis, 19–20 Aug 2019 | The Python check rejects direct first-lifting counters over cleared low 4, 6 and 8 bits, upward and downward, and first-lifting top-nibble searches in both directions, with all other bits fixed. Counter-before-hash/transform constructions are **not tested** |
+| A CM recipe reproduces secp256k1's p and n for j = 0, D = −3 | Mailbox report of Travis Scholl's calculation, 27 Oct 2019 | **Arithmetic reproduced:** seven primes in the full window, three split primes and 18 CM candidate orders, with one prime-order survivor. Python uses probable-prime tests; the Sage reconstruction uses proof-enabled primality. This neither explains G nor proves the original generation workflow |
 | sect163k1's half-generator has a 126-bit x; none of the other sect\*k1 do; a search for short x "close to" the other generators | Dan, 24 Jun 2020, pushed to `factorable/secp256k1` | Reproduced independently, record §7.1 (K-163 = 126 bits, nine other binary curves random-looking, all 28 cofactor preimages checked) |
 | "Why publish 2H rather than H? Was G/2 a test vector?" (Dan Brown) | Oct 2019 thread | Open. One thing the repo's scan adds: on K-163, h = 2, so G = 2P is just G = h·P; on the secp\*k1 curves h = 1 and G = 2P anyway; on sect233k1 … 571k1 (h = 4) neither G/2 nor G/4 is short. So neither "always double" nor "multiply by the cofactor" explains all of Certicom's Koblitz generators at once |
 | Not a backdoor; "an undocumented artifact of the generation procedure"; reuse across 224k1/256k1 argues against a trapdoor (Dan, Apr 2019) | Slides; Apr 2019 email | Same framing as `README.md` and HANDOFF §1 |
 | People Dan Brown named at Certicom: Gallant, Lambert, Blake-Wilson, Qu; the r-curve SEEDs embed "Minghua Qu" | Oct 2019 | Already in `wordlists/certicom.txt` and `scripts/k163/strings_certicom.py` |
 
-Net: the repository had independently re-derived everything computational from 2019–20. What the surveys add is the record itself (dates, who saw what first, who was consulted), one logged negative (JtR), the Bitcoin-nonce origin story, the CM derivation of the curve, and pointers to where the original code and slides are.
+Net: the coordinates and selected counter/CM calculations are reproduced. The surveys add a reported chronology, a historical negative of unknown coverage, and leads to original artifacts. A complete comparison with the 2019–20 experiments still requires the original code and records.
+
+## Reproducing the arithmetic
+
+Run from the repository root, in a shell with the named interpreter available:
+
+```sh
+python3 scripts/verify_crypto2019.py
+sage references/crypto2019-rump/halve_generators.sage
+python3 -m unittest discover -s tests -p 'test_crypto2019.py' -v
+```
+
+The standard-library Python run uses 32-round Miller-Rabin and explicitly reports probable-prime results. The independent Sage run enumerates every odd modulus in `[2^256 - 2^32 - 977, 2^256 - 2^32)` with `is_prime(proof=True)`, then checks all six CM candidate orders for each of the three split primes with the same proof-enabled setting. For the four other prime moduli, `p = 2 mod 3`, every j = 0 curve has even order `p+1`.
+
+Recorded outputs: [`verify-crypto2019.txt`](../../results/verify-crypto2019.txt) and [`verify-crypto2019-sage.txt`](../../results/verify-crypto2019-sage.txt). The Sage regression test is explicitly skipped if Sage is unavailable; the Python result is never substituted for a proof-enabled result. The tests preparse the Sage source in memory rather than leaving a generated `.sage.py` file in the repository.
 
 ## Two corrections to the repository, found while checking
 
@@ -39,8 +62,8 @@ Net: the repository had independently re-derived everything computational from 2
 ## Leads only Dan can follow
 
 1. **Original 2019–20 Sage code**: not in either mailbox or OneDrive. Per the 24 Jun 2020 email it is in `github.com/factorable/secp256k1` (private; Nadia's org, Dan and `tscholl2` were collaborators) and the discussion continued in a private channel on Nadia's Slack. Clone the repo, diff its results against `notes/record.md`, and ask Nadia for a Slack export.
-2. **The slide deck**: get the Gmail copy (above) and add it here.
-3. **Unopened attachments** (Gmail links in `gmail-survey.md`): `compute-all-the-keys.png` (Nadia, 19 Aug 2019 23:14, and Dan's reply 23:22); and a `paper.pdf` forwarded between the personal and Microsoft addresses in **June 2022**, surfaced by a search for secp256r1 and Nadia + curve — possibly the write-up Nadia proposed in Sep 2019, which the Microsoft survey says was never found.
+2. **The slide deck**: the readable replacement has now been reviewed (see above). Confirm redistribution permissions before adding any copy to the repository.
+3. **Unopened attachments** (retrieval cues in `gmail-survey.md`): `compute-all-the-keys.png` (Nadia, 19 Aug 2019 23:14, and Dan's reply 23:22); and a `paper.pdf` forwarded between the personal and Microsoft addresses in **June 2022**. Its subject matter remains unknown; search terms and a generic filename do not identify it as a draft of this work.
 4. **Ask Nadia** which wordlist the Aug 2019 John the Ripper run used, so the negative can be logged with a candidate space, like the repo's other negatives.
-5. **Ask Dan Brown** what he tried on hashes.org and whether his "160-bit value + counter" theory meant something other than counting up in the low bits (counting down, top bits, and a counter before a transform are now also excluded or checked; see `verify_crypto2019.py` §3).
+5. **Ask Dan Brown** what he tried on hashes.org and precisely where a counter entered his proposed procedure. Only the direct fixed-other-bits searches described above have been checked; a counter before hashing or another transformation remains open.
 6. Antonio Sanso's annotated slide screenshot (forward of 21 Oct 2019) and Dan's photos of the talk (20 Aug 2019) are in the Microsoft mailbox if a write-up wants them.

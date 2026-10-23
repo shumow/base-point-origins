@@ -2,7 +2,8 @@
 # Reconstruction (Oct 2026) of the 2019 base-point-halving investigation with
 # Nadia Heninger and Travis Scholl. The original Sage code was not found in mail;
 # this re-implements the computations described in the Aug-Oct 2019 threads.
-# Every number asserted below was re-checked independently in pure Python.
+# Modern arithmetic reconstruction, not evidence of the original workflow.
+# Primality checks use Sage's proof-enabled algorithms explicitly.
 
 def bits(x): return ZZ(x).nbits()
 
@@ -43,7 +44,7 @@ halves = {}
 for name, (p, b, gx, gy, n) in SECPK1.items():
     E = EllipticCurve(GF(p), [0, b])
     G = E(gx, gy)
-    n = ZZ(n); assert n * G == 0 and n.is_prime()
+    n = ZZ(n); assert n * G == 0 and n.is_prime(proof=True)
     H = halve(G)
     x = ZZ(H[0]); halves[name] = (E, x)
     assert x == EXPECTED[name], name
@@ -64,7 +65,9 @@ p = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF
 E = EllipticCurve(GF(p), [-3, 0x5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B])
 G = E(0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
       0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5)
-print("\nsecp256r1 control:", bits(ZZ(halve(G)[0])), "bits")   # 254
+control_bits = bits(ZZ(halve(G)[0]))
+assert control_bits == 254
+print("\nsecp256r1 control:", control_bits, "bits")
 
 # ---- Binary Koblitz curve sect163k1 (June 2020 follow-up) -------------------
 R.<t> = GF(2)[]
@@ -78,16 +81,36 @@ n2 = 0x04000000000000000000020108A2E0CC0D99F8A5EF
 assert n2 * G2 == 0
 H2 = ((n2 + 1) // 2) * G2; assert 2 * H2 == G2     # the half inside the prime-order subgroup
 x2 = K_to_int(H2[0])
+assert x2 == 0x23e21d6019e1211f6bd47ec180256e97 and bits(x2) == 126
 print("sect163k1:", hex(x2), f"({bits(x2)} of 163 bits)")  # 0x23e21d6019e1211f6bd47ec180256e97, 126 bits
 
 # ---- Travis Scholl's derivation of the secp256k1 field prime (email, 27 Oct 2019)
 Kq = QuadraticField(-3)
-cands = [p for p in primes(2^256 - 2^32 - 977, 2^256 - 2^32) if kronecker_symbol(Kq.disc(), p) == 1]
+lo, hi = 2^256 - 2^32 - 977, 2^256 - 2^32
+moduli = [ZZ(p) for p in range(lo, hi, 2) if ZZ(p).is_prime(proof=True)]
+offsets = [hi - p for p in moduli]
+assert offsets == [977, 949, 739, 487, 361, 359, 263]
+cands = [p for p in moduli if p % 3 == 1]
+assert len(cands) == 3
+assert all(p % 3 == 2 and (p + 1) % 2 == 0 for p in moduli if p not in cands)
+print("\n== CM window: proof-enabled primality ==")
+print("primality mode: Sage is_prime(proof=True)")
+print("proven prime offsets below 2^256-2^32:", offsets)
+print("prime moduli: 7; split primes (p = 1 mod 3): 3")
+print("For prime p = 2 mod 3, every j=0 curve has even order p+1.")
 hits = []
+orders_checked = 0
+units = Kq.roots_of_unity()
+assert len(units) == 6
 for p in cands:
     pi = Kq.prime_above(p).gens_reduced()[0]
-    for u in Kq.roots_of_unity():
+    assert pi.norm() == p
+    for u in units:
         N = ZZ((u*pi - 1).norm())
-        if N.is_prime(): hits.append((p, N))
+        orders_checked += 1
+        if N.is_prime(proof=True): hits.append((p, N))
+assert orders_checked == 18
 assert hits == [(2^256 - 2^32 - 977, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141)]
-print("\nsecp256k1 p is the largest prime below 2^256-2^32-1 with a prime-order j=0 curve: OK")
+print("CM candidate orders checked: 18; proven prime orders: 1")
+print("secp256k1 p is the largest prime below 2^256-2^32-1 with a prime-order j=0 curve: OK")
+print("This verifies the arithmetic relation, not the historical generation procedure.")

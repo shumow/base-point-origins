@@ -1,14 +1,17 @@
-"""Re-check, in pure Python, everything asserted by the 2019 investigation as
-reconstructed in references/crypto2019-rump/halve_generators.sage (Oct 2026
-mailbox survey), and tighten two statements the repository had made loosely.
+"""Recompute selected arithmetic from the reconstructed 2019 investigation.
+
+This script does not verify historical dates, search coverage, or the original
+generation procedure. Its CM check uses reproducible Miller-Rabin tests:
+positive results are probable primes, not primality certificates. Run
+sage references/crypto2019-rump/halve_generators.sage for proof-enabled checks.
 
 Run from the repository root:  python3 scripts/verify_crypto2019.py
 
 Sections
   1. x(G/2) on the four secp*k1 curves equals the 2019 values.
   2. The shared core is bits 4..155 (152 bits, `8ce563f...9c6`): only the top
-     nibble (4 vs 7) and the last nibble (2, 6, 3, 3) vary. HANDOFF/record
-     call it a 148-bit core (bits 4..151) and say the top *byte* varies; the
+     nibble (4 vs 7) and the last nibble (2, 6, 3, 3) vary. Earlier notes
+     called it a 148-bit core (bits 4..151) with a varying top *byte*; the
      byte is 48 vs 78, so its low nibble is shared too. The 2019 "256
      variants" John the Ripper list (top and bottom nibble) matches the
      152-bit core; the repo's 12,288-target hashcat list (top byte and bottom
@@ -77,8 +80,8 @@ check(core == 0x8ce563f89a0ed9414f5aa28ad0d96d6795f9c6,
 check({v >> 156 for v in low160.values()} == {4, 7}, "top nibble of the 160-bit block is 4 (160k1) or 7 (others)")
 check([v & 15 for v in low160.values()] == [2, 6, 3, 3], "last nibbles 2, 6, 3, 3")
 a, b, c_ = xs["secp160k1"], xs["secp192k1"], xs["secp224k1"]
-check(c_ - a == 0x3b3 * 2**156 + 1, "224/256k1 value - 160k1 value = 0x3b3 * 2^156 + 1  (record.md 7.3.2 says 2^152: typo)")
-check(b - c_ == 0x55412 * 2**168 + 3, "192k1 value - 224/256k1 value = 0x55412 * 2^168 + 3  (record.md 7.3.2 says 2^172: typo)")
+check(c_ - a == 0x3b3 * 2**156 + 1, "224/256k1 value - 160k1 value = 0x3b3 * 2^156 + 1")
+check(b - c_ == 0x55412 * 2**168 + 3, "192k1 value - 224/256k1 value = 0x55412 * 2^168 + 3")
 print("     2019 JtR list: top and bottom nibble varied -> 16*16 = 256 digests, matches a 152-bit core;")
 print("     repo make_targets.py: top byte and bottom nibble -> 4096 per reading, one nibble looser (superset).")
 
@@ -93,10 +96,14 @@ for name in K1:
         print(f"     {name} low {k} bits: actual {x % 2**k:>3}, counting up first valid {valid[0]:>3} "
               f"(first few {valid[:5]}), counting down first valid {down[0]:>3}")
         check(valid[0] != x % 2**k, f"{name}: count-up over the low {k} bits does not pick the actual value")
+        check(down[0] != x % 2**k, f"{name}: count-down over the low {k} bits does not pick the actual value")
     # vary the top nibble of the 160-bit block instead (bits 156..159), low bits fixed
     top_fixed_rest = x & ~(0xF << 156)
     lifts = [t for t in range(16) if is_x(c, top_fixed_rest | (t << 156))]
     print(f"     {name} top nibble of the 160-bit block: actual {x >> 156 & 15}, nibbles that lift {lifts}")
+    check(lifts[0] != (x >> 156 & 15), f"{name}: first lifting top nibble counting up does not pick the actual value")
+    check(lifts[-1] != (x >> 156 & 15), f"{name}: first lifting top nibble counting down does not pick the actual value")
+print("     Counter-before-hash/transform constructions are not tested.")
 
 # ---- 4. control -------------------------------------------------------------
 print("4. secp256r1 control")
@@ -122,7 +129,7 @@ check(H2[0] == 0x23e21d6019e1211f6bd47ec180256e97 and H2[0].bit_length() == 126,
 print("6. the secp256k1 field prime via CM (Scholl, 27 Oct 2019)")
 
 
-def is_prime(n, rounds=32):
+def is_probable_prime(n: int, rounds: int = 32) -> bool:
     if n < 2: return False
     for q in (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37):
         if n % q == 0: return n == q
@@ -170,18 +177,29 @@ def cornacchia(p):  # a^2 + 3 b^2 = p, exists iff p = 1 mod 3
 
 
 lo_, hi_ = 2**256 - 2**32 - 977, 2**256 - 2**32
+print("     CM primality mode: 32-round Miller-Rabin; probable primes, not certificates.")
+moduli = [p for p in range(lo_ | 1, hi_, 2) if is_probable_prime(p)]
+offsets = [hi_ - p for p in moduli]
+print(f"     probable-prime offsets below 2^256-2^32: {offsets}")
+check(offsets == [977, 949, 739, 487, 361, 359, 263], "7 probable-prime moduli in the full window")
+split_moduli = [p for p in moduli if p % 3 == 1]
+check(len(split_moduli) == 3, "3 split moduli (p = 1 mod 3)")
+print("     For prime p = 2 mod 3, every j=0 curve has even order p+1.")
 hits = []
-for p in range(lo_ | 1, hi_, 2):
-    if p % 3 != 1 or not is_prime(p): continue
+orders_checked = 0
+for p in split_moduli:
     ab = cornacchia(p); assert ab is not None
     a_, b_ = ab; assert a_ * a_ + 3 * b_ * b_ == p
     # the six twists of y^2 = x^3 + b over F_p have orders p + 1 - t, t = +-2a, +-(a + 3b), +-(a - 3b)
     for t in (2 * a_, -2 * a_, a_ + 3 * b_, -(a_ + 3 * b_), a_ - 3 * b_, -(a_ - 3 * b_)):
         N = p + 1 - t
-        if is_prime(N): hits.append((p, N))
+        orders_checked += 1
+        if is_probable_prime(N): hits.append((p, N))
+check(orders_checked == 18, "18 CM candidate orders checked")
 check(hits == [(curves["secp256k1"].p, curves["secp256k1"].n)],
-      "the only (p, prime order) pair with 2^256-2^32-977 <= p < 2^256-2^32 is secp256k1's (p, n)")
+      "the only probable-prime (p, order) pair in the window is secp256k1's (p, n)")
 
 print()
-print("ALL OK" if not failures else f"{len(failures)} FAILURE(S): " + "; ".join(failures))
+print("ALL OK (CM primality is probable-prime only)" if not failures
+      else f"{len(failures)} FAILURE(S): " + "; ".join(failures))
 sys.exit(1 if failures else 0)
