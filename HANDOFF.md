@@ -1,6 +1,6 @@
 # Hand-off: everything known about the base-point problem, for a fresh agent
 
-*Written 2026-10-20 at the end of the session that spun this repository out of [ECDSA-Origins-Revealed-Followup](https://github.com/shumow/ECDSA-Origins-Revealed-Followup), with later archival updates. Read this first; then `notes/plan.md` (the search plan) and `notes/record.md` (the computational record). Computational results have the stated checks; historical dates, search configurations and original workflow claims retain their source limitations.*
+*Written 2026-10-20 at the end of the session that spun this repository out of [ECDSA-Origins-Revealed-Followup](https://github.com/shumow/ECDSA-Origins-Revealed-Followup). Read this first; then `notes/plan.md` (the search plan) and `notes/record.md` (the computational record). Everything below has been verified by direct computation in this session unless marked otherwise; the 2019–20 history in §2.6 and §3.0 is reported from mailbox surveys, with its evidence levels set out in `references/crypto2019-rump/README.md`.*
 
 ## 0. The one-paragraph version
 
@@ -60,7 +60,7 @@ First 92 bits shared (`4a96b5688ef573284664698`), remaining 68 differ wholesale 
 
 ### 2.6 Prior art
 - Heninger, Scholl, Shumow, Crypto 2019 rump session, 21:00, title `48ce563f89a0ed9414f5aa28ad0d96d6795f9c62` (= x(G/2) on secp160k1). Video: https://www.youtube.com/watch?v=NGLR2N4EK58. No slides on the IACR page. Dan was a co-author, so the secp\*k1 observation is his and Nadia's prior work; this repo reproduces it across all four curves and extends the scan.
-- **The 2019–20 record, reported by mailbox surveys on 22 Oct 2026:** `references/crypto2019-rump/` separates the chronology from reproduced arithmetic. The surveys attribute the wider prime-curve observation to Travis (24 Mar 2019), the secp160k1 calculation to the Crypto meeting, the JtR search to Nadia (§3.0), the CM calculation to Travis (27 Oct 2019), and the binary-curve follow-up to Dan (June 2020). Original code and discussion are reportedly in the private `factorable/secp256k1` repository and Nadia's Slack; neither was accessed in this review. A readable slide deck was checked locally: page 7 lists the four prime-field half-generators, page 11 labels SHA-1 as a hypothesis, and page 13 asks for archival and GPU help. Page 3's 99% repeated-nonce statistic is a statement about the 2019 investigation, not a newly validated blockchain measurement. The Python verifier reproduces selected arithmetic with probable-prime CM checks; the Sage reconstruction independently uses proof-enabled primality. Neither script certifies the chronology or original workflow.
+- **The 2019–20 record, recovered 22 Oct 2026 from Dan's mailboxes:** `references/crypto2019-rump/` (README there is the synthesis, with an "Evidence levels" section saying what was checked in the slides, what is reported from mail, and what the scripts prove). Per the surveys: Travis Scholl saw the short halves first (24 Mar 2019); Nadia had the 256k1 case because, as the slides report, 99% of repeated Bitcoin nonces in that investigation were (n−1)/2; the 160-bit curve was found at Crypto on 18 Aug 2019; Nadia ran John the Ripper over the 256 top/bottom-nibble variants (nothing, coverage unknown, §3.0); Dan Brown and Antonio Sanso supplied the CM history and the counter theory; Travis derived the secp256k1 prime by CM (27 Oct 2019); Dan extended to the sect\*k1 curves in June 2020 (only sect163k1 is short — matches §2.4). The original Sage code is in the private `factorable/secp256k1` repo and Nadia's Slack, not in mail. Dan checked the readable slide deck locally on 22 Oct 2026 (page references in the folder README); it is not redistributed. `scripts/verify_crypto2019.py` (Python, probable-prime tests) and `halve_generators.sage` (Sage, proof-enabled primality) re-check every number from that record.
 - The SEC 2 v1.0 r-curve SEEDs embed ASCII: secp112r1 `…8E4D696E676875615175…` = "Minghua Qu"; likewise secp112r2, secp128r1/r2, secp160r1 (`…4D696E6768756151 7533…`). The same people were demonstrably putting names into constants. Treat this as a hint about *which strings* to hash.
 
 ## 3. What has been tried and failed
@@ -136,8 +136,8 @@ wordlists/certicom.txt     Certicom-era base dictionary for the next search pass
 notes/hash-angle.md        the Merkle–Damgård analysis and the V1/V2 search plans
 references/README.md       Stevens / Stevens–Shumow papers to add and what to extract from them
 scripts/binpts.py, .gp     NIST binary-curve scan (Python / PARI)
-scripts/verify_crypto2019.py  selected arithmetic and direct counter checks; probable-prime CM corroboration (→ results/verify-crypto2019.txt)
-references/crypto2019-rump/halve_generators.sage  independent reconstruction with proof-enabled primality (→ results/verify-crypto2019-sage.txt)
+scripts/verify_crypto2019.py  re-checks the 2019–20 record: half-generators, 152-bit core, counter theory, P-256 control, K-163, CM derivation of secp256k1's p with probable-prime tests (→ results/verify-crypto2019.txt)
+references/crypto2019-rump/halve_generators.sage  the same in Sage with proof-enabled primality (→ results/verify-crypto2019-sage.txt; tests/test_crypto2019.py runs both)
 references/crypto2019-rump/  the 2019–20 investigation as recovered from mail (surveys, reconstructed Sage, synthesis README with leads)
 scripts/k163/              hash dictionary harness: search.py, strings.py, strings_certicom.py, hashes.py (MD4, SHA-0, RIPEMD-128)
 data/bincurves.json        verified NIST binary-curve parameters

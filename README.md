@@ -28,7 +28,7 @@ The secp\*k1 observation was first made in the Heninger–Scholl–Shumow Crypto
 | [`tests/`](tests/) | positive controls: every search here must recover a planted or known answer (`python3 -m unittest discover -s tests`) |
 | [`wordlists/`](wordlists/), `scripts/make_targets.py` | the hashcat side of the search: Certicom-era dictionary and the 12,288-target list |
 | [`GPU-Experiments-ToDo.md`](GPU-Experiments-ToDo.md) | outstanding heavy GPU experiments, tooling prerequisites, budgets, and completion criteria |
-| [`references/crypto2019-rump/`](references/crypto2019-rump/) | mailbox-survey history, slide-checked claims and selected arithmetic reconstructions; Python probable-prime and independent proof-enabled Sage checks |
+| [`references/crypto2019-rump/`](references/crypto2019-rump/) | the 2019–20 Heninger–Scholl–Shumow investigation as recovered from mail: timeline, hypotheses, leads, and what each claim rests on; `scripts/verify_crypto2019.py` and `halve_generators.sage` re-check its numbers |
 
 ## Status (20 October 2026)
 

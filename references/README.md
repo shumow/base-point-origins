@@ -2,7 +2,7 @@
 
 ## `crypto2019-rump/` — the 2019–20 investigation (added 22 Oct 2026)
 
-Mailbox surveys, a reconstructed Sage script and a synthesis README for the Heninger–Scholl–Shumow Crypto 2019 rump-session work and its 2020 follow-up. Start with [`crypto2019-rump/README.md`](crypto2019-rump/README.md), which separates slide-checked facts, reported history and modern arithmetic. A readable slide replacement supplied by Dan was reviewed locally on 22 Oct 2026, but is not redistributed here. Private mailbox links are redacted; further correspondence or attachment publication needs permission review. Python reports probable-prime CM checks; the Sage reconstruction independently uses proof-enabled primality.
+Mailbox surveys, a reconstructed Sage script and a synthesis README for the Heninger–Scholl–Shumow Crypto 2019 rump-session work and its 2020 follow-up. Start with [`crypto2019-rump/README.md`](crypto2019-rump/README.md). The slide deck is not included: the mailbox copy is IRM-encrypted, and the readable copy Dan checked on 22 Oct 2026 stays out until redistribution is cleared. Private mailbox links are redacted from the surveys.
 
 ## Hash-cryptanalysis papers
 
