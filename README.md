@@ -7,7 +7,7 @@
 Nothing here is an attack, and nothing here suggests one. Anthropic's October 2026 result settled the curve *seeds*: `lrand48()` from the Unix clock, candidates drawn in order, no hash of anybody's sentence. The *base points* are the piece that is still unexplained for fourteen of the twenty NIST/ANSI curves — P-224, P-256, P-384, P-521, the five B curves and the five K curves — and for every SEC 2 curve beyond those. And the structure we can see in them is of a specific kind:
 
 - secp224k1 and secp256k1 have the **identical** 166-bit *x*-coordinate at *G*/2: `3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63`.
-- secp160k1 and secp192k1 carry the same 148-bit core with different top bits and last nibbles (`48ce563f…9c62`, `554123b78ce563f…9c66`).
+- secp160k1 and secp192k1 carry the same 152-bit core with a different top nibble, prefix and last nibble (`48ce563f…9c62`, `554123b78ce563f…9c66`).
 - *x*(*G*/2) on secp160r2 shares its first 92 bits with *x*(*G*) on secp160r1.
 - The half of the K-163 generator has a 126-bit *x*: `23e21d6019e1211f6bd47ec180256e97`.
 
@@ -28,6 +28,7 @@ The secp\*k1 observation was first made in the Heninger–Scholl–Shumow Crypto
 | [`tests/`](tests/) | positive controls: every search here must recover a planted or known answer (`python3 -m unittest discover -s tests`) |
 | [`wordlists/`](wordlists/), `scripts/make_targets.py` | the hashcat side of the search: Certicom-era dictionary and the 12,288-target list |
 | [`GPU-Experiments-ToDo.md`](GPU-Experiments-ToDo.md) | outstanding heavy GPU experiments, tooling prerequisites, budgets, and completion criteria |
+| [`references/crypto2019-rump/`](references/crypto2019-rump/) | the 2019–20 Heninger–Scholl–Shumow investigation as recovered from mail: timeline, hypotheses, leads, and what each claim rests on; `scripts/verify_crypto2019.py` and `halve_generators.sage` re-check its numbers |
 
 ## Status (20 October 2026)
 
@@ -36,7 +37,7 @@ Everything run so far is negative, and each negative is now backed by a positive
 - No acceptance rule among ~11,500 tried selects the per-curve last nibbles 2, 6, 3, 3.
 - The 148-bit core is not the SHA-1 / SHA-0 / RIPEMD-160 (or doubled-hash) digest of any of ~290,000 NIST-era and Certicom-era strings in their case / punctuation / encoding / counter variants — three independent passes, ~70 million evaluations in all. The K-163 value is not the MD5 / MD4 / RIPEMD-128 (or truncated SHA-1) digest of any of them either.
 - The FreeLIP `zrandom` recipe that produced P-192's base point does not produce P-224/256/384/521's or secp160k1's for any seed below 100,000.
-- The 192k1 value is the 224/256k1 value with `55412` written in above bit 172 and the last nibble raised by 3; the X9.62 seed-to-field expansion is excluded.
+- The 192k1 value is the 224/256k1 value plus `(0x55412 << 168) + 3`; the X9.62 seed-to-field expansion is excluded.
 
 The next step is **V1** of [`notes/hash-angle.md`](notes/hash-angle.md): the same search as a GPU dictionary-and-mask attack with hashcat against the 12,288-target list, which reaches candidate spaces (all printable ASCII to length 8, rule-expanded dictionaries) that pure-Python passes cannot. We are experimenting on laptop-class GPUs. **If you have GPU time and would like to run this, we'd be happy to talk** — open an issue or get in touch.
 

@@ -1,5 +1,11 @@
 # References
 
+## `crypto2019-rump/` — the 2019–20 investigation (added 22 Oct 2026)
+
+Mailbox surveys, a reconstructed Sage script and a synthesis README for the Heninger–Scholl–Shumow Crypto 2019 rump-session work and its 2020 follow-up. Start with [`crypto2019-rump/README.md`](crypto2019-rump/README.md). The slide deck is not included: the mailbox copy is IRM-encrypted, and the readable copy Dan checked on 22 Oct 2026 stays out until redistribution is cleared. Private mailbox links are redacted from the surveys.
+
+## Hash-cryptanalysis papers
+
 PDFs to add here. Two automated sessions (20 Oct) could not download them: the sandbox network reaches GitHub and package registries only, and the fetch tool returns extracted text, not the file. Drop them in by hand or attach them in a chat; exact URLs:
 
 - Thesis: https://marc-stevens.nl/research/papers/PhD%20Thesis%20Marc%20Stevens%20-%20Attacks%20on%20Hash%20Functions%20and%20Applications.pdf
