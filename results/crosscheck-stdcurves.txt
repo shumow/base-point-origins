@@ -1,0 +1,46 @@
+Cross-check vs references/std-curves/secg-curves.json (33 SECG curves)
+======================================================================
+Prime curves (secg_scan.CURVES):
+  [ok  ] secp112r1: 7 fields
+  [ok  ] secp112r2: 7 fields
+  [ok  ] secp128r1: 7 fields
+  [ok  ] secp128r2: 7 fields
+  [ok  ] secp160k1: 7 fields
+  [ok  ] secp160r1: 7 fields
+  [ok  ] secp160r2: 7 fields
+  [ok  ] secp192k1: 7 fields
+  [ok  ] secp224k1: 7 fields
+  [ok  ] secp256k1: 7 fields
+Binary sect*k1 (sectk_2020_checks.SECTK):
+  [ok  ] sect163k1: 7 fields
+  [ok  ] sect233k1: 7 fields
+  [ok  ] sect239k1: 7 fields
+  [ok  ] sect283k1: 7 fields
+  [ok  ] sect409k1: 7 fields
+  [ok  ] sect571k1: 7 fields
+NIST binary curves (data/bincurves.json), matched by std-curves alias:
+  [ok  ] B-163 = sect163r2: 7 fields
+  [ok  ] K-163 = sect163k1: 7 fields
+  [ok  ] K-233 = sect233k1: 7 fields
+  [ok  ] B-233 = sect233r1: 7 fields
+  [ok  ] K-283 = sect283k1: 7 fields
+  [ok  ] B-283 = sect283r1: 7 fields
+  [ok  ] K-409 = sect409k1: 7 fields
+  [ok  ] B-409 = sect409r1: 7 fields
+  [ok  ] K-571 = sect571k1: 7 fields
+  [ok  ] B-571 = sect571r1: 7 fields
+Aliases of the Koblitz curves (for notes/archival.md):
+  secp160k1: x963/ansip160k1
+  secp192k1: x963/ansip192k1
+  secp224k1: x963/ansip224k1
+  secp256k1: x963/ansip256k1
+  sect163k1: nist/K-163, x963/ansit163k1, wtls/wap-wsg-idm-ecid-wtls3
+  sect233k1: nist/K-233, wtls/wap-wsg-idm-ecid-wtls10, x963/ansit233k1
+  sect239k1: x963/ansit239k1
+  sect283k1: nist/K-283, x963/ansit283k1
+  sect409k1: nist/K-409, x963/ansit409k1
+  sect571k1: nist/K-571, x963/ansit571k1
+
+RESULT: every compared field agrees with std-curves. The secp*k1 and
+sect*k1 generators, fields, orders and cofactors this project analyses
+are confirmed against an independent catalog.

@@ -77,7 +77,23 @@ registries only); everything else is for a networked session or hand-drop.
 5. **SEC 2 v1.5 working draft (2005-09-27)** — `http://rfc.nop.hu/secg/sec2.pdf` (mirror). Diff notes vs v1.0/v2.0. *Not reachable here.*
 6. **IEEE P1363 working-group archives** (`grouper.ieee.org/groups/1363/`) — a result surfaced `https://grouper.ieee.org/groups/1904/4/email/pdf7kia4jRaeI.pdf` citing "Recommended Elliptic Curve Domain Parameters"; identity/date unconfirmed. *Not reachable here.*
 7. **Secondary catalogs for cross-checks** (provenance notes, aliases, not drafts):
-   SafeCurves `https://safecurves.cr.yp.to/refs.html`; DiSSECT `https://dissect.crocs.fi.muni.cz/standards/secg`; std-curves `https://std.neuromancer.sk/secg/secp256k1/`. *Not reachable here; std-curves also exists as a GitHub repo (J08nY/std-curves) that could be added with `add_repo` if a machine-readable cross-check is wanted.*
+   SafeCurves `https://safecurves.cr.yp.to/refs.html`; DiSSECT `https://dissect.crocs.fi.muni.cz/standards/secg`; std-curves `https://std.neuromancer.sk/secg/secp256k1/`. *Not reachable over the web here, but **std-curves is done**: J08nY/std-curves was added (git-readable) and its SECG section vendored at `references/std-curves/secg-curves.json` (commit `77fe6e3`, MIT). `scripts/crosscheck_stdcurves.py` confirms all 26 overlapping curves (10 prime, 6 sect\*k1, 10 NIST binary) agree field-for-field with this repo — 182 fields, 0 mismatches — so the generators under analysis rest on a second independent catalog. See "Cross-check" below.*
+
+## Cross-check against std-curves (done 23 Oct 2026)
+
+`scripts/crosscheck_stdcurves.py` → `results/crosscheck-stdcurves.txt` (controls
+`tests/test_crosscheck.py`, 5 tests incl. a planted-mismatch detection). Every
+(p/poly, a, b, Gx, Gy, n, h) for the 10 SECG prime curves, the 6 sect\*k1 binary
+curves and the 10 NIST binary curves (matched by std-curves alias) matches this
+repo's `secg_scan.CURVES`, `sectk_2020_checks.SECTK` and `data/bincurves.json`.
+So nothing in the base-point analysis rests on a lone transcription of G.
+
+Aliases recorded for the archival trail (search drafts under these too): the
+prime Koblitz curves carry only `x963/ansip*k1` (ANSI X9.63) — no NIST or WTLS
+alias — while the binary Koblitz curves carry `nist/K-*`, `x963/ansit*k1`, and
+some a WTLS id (sect163k1 = `wtls/wap-wsg-idm-ecid-wtls3`, sect233k1 = `wtls10`).
+So secp256k1 and the other prime k-curves are Certicom/ANSI-X9.63 only, which
+narrows where an early draft of *their* base points could live.
 
 ## Network constraint (why the fetch step is not done here)
 

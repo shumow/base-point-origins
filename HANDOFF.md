@@ -129,6 +129,7 @@ notes/archival.md          §4.5 archival pass: decision rule, standards timelin
 scripts/secg_scan.py       SEC 2 prime-curve scan (pure Python, ~2 min for all ten)
 scripts/secg_core_search.py core-matched dictionary search (STRINGS=strings|strings_certicom selects the set)
 scripts/nibble_rules.py    brute-force of last-nibble acceptance rules
+scripts/crosscheck_stdcurves.py  cross-checks all SECG params against vendored J08nY/std-curves; 26 curves, 0 mismatches (→ results/crosscheck-stdcurves.txt; references/std-curves/; tests/test_crosscheck.py)
 scripts/high_bytes_analysis.py  §4.2: structure of the four secp*k1 x(G/2) and the top-byte/192k1-prefix exclusions (→ results/high-bytes-analysis.txt; tests/test_high_bytes.py)
 scripts/counter_before_hash.py  §4.2(b): models a counter in the hash input; excludes it as the source of the top byte (→ results/counter-before-hash.txt, results/counter-before-hash-probe.json; tests/test_counter_before_hash.py)
 scripts/counter_second_hash.py  §4.2(b): models the two-stage counter-before-second-hash variant on the digest; unsupported (→ results/counter-second-hash.txt; tests/test_counter_second_hash.py)
@@ -146,6 +147,7 @@ references/README.md       Stevens / Stevens–Shumow papers to add and what to 
 scripts/binpts.py, .gp     NIST binary-curve scan (Python / PARI)
 scripts/verify_crypto2019.py  re-checks the 2019–20 record: half-generators, 152-bit core, counter theory, P-256 control, K-163, CM derivation of secp256k1's p with probable-prime tests (→ results/verify-crypto2019.txt)
 references/crypto2019-rump/halve_generators.sage  the same in Sage with proof-enabled primality (→ results/verify-crypto2019-sage.txt; tests/test_crypto2019.py runs both)
+references/std-curves/     vendored SECG section of J08nY/std-curves (secg-curves.json, commit 77fe6e3, MIT) + provenance README; the independent source for scripts/crosscheck_stdcurves.py
 references/crypto2019-rump/  the 2019–20 investigation as recovered from mail (surveys, reconstructed Sage, synthesis README with leads); factorable-secp256k1/ holds Dan's original 2020 Sage code
 scripts/sectk_2020_checks.py  replicates the 2020 sect*k1 searches: recorded grid minima recomputed, G = P + σ(P) hypothesis on all six curves (→ results/sectk-2020-checks.txt; tests/test_sectk2020.py)
 scripts/k163/              hash dictionary harness: search.py, strings.py, strings_certicom.py, hashes.py (MD4, SHA-0, RIPEMD-128)
