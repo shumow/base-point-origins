@@ -1,0 +1,8 @@
+# full grid sigma^k(2^-j G) + T, 0 <= j,k < m, T in E[h]; started 2026-10-23 03:25:14 UTC
+sect163k1: global minimum 126 of 163 bits at (k=0, j=1): 23e21d6019e1211f6bd47ec180256e97  [2020 record: 126 bits at (k=0, j=1); uniform ~148 bits]  MATCHES the 2020 record  (0.2 min)
+sect233k1: global minimum 215 of 233 bits at (k=89, j=45): 661f999262551200178956536e047d906dbdee0dec0c7597f53ae3  [2020 record: 215 bits at (k=89, j=45); uniform ~216 bits]  MATCHES the 2020 record  (0.9 min)
+sect239k1: global minimum 219 of 239 bits at (k=56, j=153): 4f8c144480033052df685ab429878f71c42aa841ca1519db38298a5  [2020 record: 219 bits at (k=56, j=153); uniform ~222 bits]  MATCHES the 2020 record  (1.0 min)
+sect283k1: global minimum 266 of 283 bits at (k=18, j=13): 3750cacdb38706fa100dfa62919bd3015ef8a5ba82051ad7e6701daa609b2c7c677  [2020 record: 266 bits at (k=18, j=13); uniform ~265 bits]  MATCHES the 2020 record  (1.7 min)
+sect409k1: global minimum 390 of 409 bits at (k=134, j=139): 20539cf83831d530ea184d469f6879ec06add32aa47c41d834819ff6a4652fa20d4737bd7f31fcdf938e6d79191379833b  [2020 record: 390 bits at (k=134, j=139); uniform ~390 bits]  MATCHES the 2020 record  (5.3 min)
+sect571k1: global minimum 549 of 571 bits at (k=261, j=265): 11d12cc87a035e5bd8f908be3c6af41b7fe69e71ca6c914e8570461863aed5e576b863eb535a1b5f30c896c3860efde2fc22310889b06f7398cd263da94b3bda953fda1590  [2020 record: 549 bits at (k=261, j=265); uniform ~551 bits]  MATCHES the 2020 record  (14.7 min)
+# done; all curves match the 2020 record
