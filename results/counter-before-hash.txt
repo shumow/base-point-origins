@@ -1,0 +1,60 @@
+Counter-before-hash on the secp160k1 top byte (HANDOFF §4.2(b))
+======================================================================
+  secp160k1  top nibble (bits156-159)=4  high=0x0  low152 core=8ce563f89a0ed9414f5aa28ad0d96d6795f9c6
+  secp192k1  top nibble (bits156-159)=7  high=0x554123b  low152 core=8ce563f89a0ed9414f5aa28ad0d96d6795f9c6
+  secp224k1  top nibble (bits156-159)=7  high=0x3b  low152 core=8ce563f89a0ed9414f5aa28ad0d96d6795f9c6
+  secp256k1  top nibble (bits156-159)=7  high=0x3b  low152 core=8ce563f89a0ed9414f5aa28ad0d96d6795f9c6
+
+A. Structural result: the top byte cannot be hash output
+   All four share bits 4..155 (152 bits). The differing part the name calls
+   the 'top byte' is really the nibble at bits 156..159: 0x4 on secp160k1,
+   0x7 on the other three (bits 152..155 = 0x8 are shared, inside the core).
+   Let value_k = HASH(input_k) for curve k, input_k = seed with a counter
+   folded in (any encoding above). A good hash makes bits 4..155 of its
+   output a function of the whole input with full avalanche, so:
+     bits 4..155 equal across all four  =>  input_k all equal (else a
+     152-bit coincidence, probability ~2^-152 per pair), and equal input
+     gives equal output EVERYWHERE, including bits 156..159.
+   But bits 156..159 are 4 vs 7. Contradiction. Therefore under EVERY
+   counter-before-hash scheme the differing nibble is a POST-hash edit;
+   the counter-in-the-input can produce the shared digest, never the split.
+
+A'. Demonstration: the observed signature never arises
+    The observed signature is a PAIR of curves whose low 152 bits (bits 4..155)
+    are equal WHILE the top nibble (bits 156..159) differs. Model: for each
+    curve, i = 0,1,2,... ; D = SHA1(seed || i_be4); accept the first D that
+    lifts to a point. Two outcomes are possible and neither is the signature:
+    curves land on the same i (identical FULL digest, top nibble included), or
+    on different i (independent digests). Count signature pairs across seeds.
+    64 seeds, 384 curve-pairs examined.
+    pairs matching the observed signature (shared 152-bit core, DIFFERENT top
+    nibble) = 0.  (The real data has this on all three pairs within
+    {192,224,256} and between them and 160k1 -- 5 of 6 pairs.)
+    => counter-before-hash yields either an identical digest (same top nibble
+       too) or an independent one; it never produces shared-low/split-top.
+
+B. If the edit is itself a counter/tag, does one rule fit all four?
+    secp160k1  field 160 bits, tag above bit156 = 0x4
+    secp192k1  field 192 bits, tag above bit156 = 0x554123b7
+    secp224k1  field 224 bits, tag above bit156 = 0x3b7
+    secp256k1  field 256 bits, tag above bit156 = 0x3b7
+    secp224k1 and secp256k1: identical tag 0x3b7 over DIFFERENT fields;
+    secp192k1: 0x554123b7, the LARGEST tag over the SMALLEST of the three
+    extended fields; secp160k1: 0x4, no high material. No monotone function
+    of the field size, and no per-curve counter (224=256), produces this set.
+    The tag tracks which curves reuse a value, not the field -- consistent
+    with a hand-written limb, not a computed or counted one.
+
+C. Bounded probe: counter folded into the input, matched against the core
+    21,316,608 evaluations over 6939 base strings, counter 0..127, 2 encodings, 6 placements, 2 hashes: 0 hit(s).
+    manifest -> results/counter-before-hash-probe.json
+
+CONCLUSION
+  Counter-before-hash is modelled and excluded as the SOURCE OF THE TOP BYTE:
+  the shared 152-bit core forces a single hashed input, which cannot also
+  yield a different top nibble. A counter in the input can only explain the
+  shared digest; the 0x78->0x48 edit on secp160k1 (and the 0x3b / 0x554123b
+  high material) is a post-hash step, matching the §7.3.7 'hand-assigned tag'
+  reading. What remains genuinely untested is a counter before a SECOND hash
+  or transform applied to the digest -- a different, more baroque hypothesis.
+  The bounded input-counter probe added 21,316,608 evaluations over the Certicom list: 0 hit(s).
