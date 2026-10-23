@@ -12,8 +12,9 @@ A. Plain transforms of V (no counter): CRC32, Adler32, word sum/xor, slices
 B. Windows of H2(V) with no counter (is the limb a slice of a re-hash?)
     324 window checks over 9 hashes; 0 limb hit(s).
 
-C. Counter before the second hash: windows of H2(enc(V, i)), small i
-    25,559,040 window checks (fast hashes to i<65536, slow to i<4096).
+C. Counter before the second hash: windows of H2(enc(V, i)), small i,
+   for each V form (the 192k1 limb sits above V(..c66), the 224/256 limb above V(..c63))
+    76,677,120 window checks over 3 V forms (fast hashes to i<65536, slow to i<4096).
     0x0000003b (secp224k1/256k1 high limb): no small-counter second-hash window produces it.
     0x0554123b (secp192k1 high limb): no small-counter second-hash window produces it.
     Joint recipe (one hash+enc+reading yielding both 0x0000003b and 0x0554123b):

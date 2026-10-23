@@ -141,20 +141,23 @@ def main(do_slow):
     say()
 
     # ---- C. counter before the second hash -------------------------------
-    say("C. Counter before the second hash: windows of H2(enc(V, i)), small i")
+    say("C. Counter before the second hash: windows of H2(enc(V, i)), small i,")
+    say("   for each V form (the 192k1 limb sits above V(..c66), the 224/256 limb above V(..c63))")
     FAST_N, SLOW_N = 1 << 16, 1 << 12
-    found32 = {t: [] for t in T32}      # (hash, enc, reading, counter) producing each 32-bit limb
+    found32 = {t: [] for t in T32}      # (hash, enc, reading, counter, V form) producing each 32-bit limb
     nC = 0
-    for hname, hf in H2.items():
-        N = SLOW_N if hname in SLOW_H2 else FAST_N
-        for i in range(N):
-            for ename, msg in counter_inputs(V_FORMS["V(..c63)"].to_bytes(20, "big"), i):
-                d = hf(msg)
-                for rname, w in word_readings(d):
-                    nC += 1
-                    if w in T32:
-                        found32[w].append((hname, ename, rname, i))
-    say(f"    {nC:,} window checks (fast hashes to i<{FAST_N}, "
+    for vname, v in V_FORMS.items():
+        vbytes = v.to_bytes(20, "big")
+        for hname, hf in H2.items():
+            N = SLOW_N if hname in SLOW_H2 else FAST_N
+            for i in range(N):
+                for ename, msg in counter_inputs(vbytes, i):
+                    d = hf(msg)
+                    for rname, w in word_readings(d):
+                        nC += 1
+                        if w in T32:
+                            found32[w].append((hname, ename, rname, i, vname))
+    say(f"    {nC:,} window checks over {len(V_FORMS)} V forms (fast hashes to i<{FAST_N}, "
         f"{'slow to i<%d' % SLOW_N if do_slow else 'slow hashes off'}).")
     for t, who in T32.items():
         lst = found32[t]
@@ -167,8 +170,8 @@ def main(do_slow):
     joint = []
     by_recipe = {}
     for t in T32:
-        for (hname, ename, rname, i) in found32[t]:
-            by_recipe.setdefault((hname, ename, rname), {}).setdefault(t, i)
+        for (hname, ename, rname, i, vname) in found32[t]:
+            by_recipe.setdefault((hname, ename, rname), {}).setdefault(t, (i, vname))
     for recipe, d in by_recipe.items():
         if len(d) == len(T32):
             joint.append((recipe, d))
