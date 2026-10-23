@@ -98,8 +98,8 @@ Find what fixes the top 92 bits of §2.2 and varies the bottom 68. Compute x(G/2
 ### 4.4 K-163 as the MD5 sibling
 Rerun the K-163 search with the 4.1 strings. Also test: the 126-bit value as the low/high 126 of a SHA-1 digest; MD5 with the top two bits masked; the value as *x of the point before cofactor clearing on another convention* (G = 2P vs P = G/2 are the same here, but check G + T for T the 2-torsion point as the starting point — done: 162 bits).
 
-### 4.5 Archival
-SEC 1 / SEC 2 drafts 1999–2000; Certicom ECC Challenge documents (1997); IEEE P1363 working-group archives; WTLS (WAP) spec and drafts; ANSI X9.62/X9.63 drafts; any Certicom test-vector or "ECC parameters" documents; the SECG mailing list archive. A draft with a *different* generator dates the constant; a draft with a *stated derivation* ends the search. Nobody has done this pass.
+### 4.5 Archival — pass STARTED 23 Oct 2026, catalog in `notes/archival.md`
+SEC 1 / SEC 2 drafts 1999–2000; Certicom ECC Challenge documents (1997); IEEE P1363 working-group archives; WTLS (WAP) spec and drafts; ANSI X9.62/X9.63 drafts; any Certicom test-vector or "ECC parameters" documents; the SECG mailing list archive. A draft with a *different* generator dates the constant; a draft with a *stated derivation* ends the search. **Started:** `notes/archival.md` holds the decision rule, the standards timeline, the prioritized target catalog with URLs/reachability, and the search-level findings — chiefly that no public standard states a base-point derivation for the Koblitz curves (SEC 2 v1.0 gives only the curve-selection method; SEC 1 defers generation to X9.62:1998), and that **GEC 2: Test Vectors for SEC 1 (Certicom, reported v0.3, Sept 1999)** predates SEC 2 v1.0 by a year and is the top pre-SEC-2 target. The retrieval step is blocked in this sandbox: WebFetch reaches only GitHub and package registries (secg.org, web.archive.org, safecurves, rfc.nop.hu, ieee.org all fail DNS), so the PDFs are a hand-drop or networked-session job per the fetch list in `notes/archival.md` — drop them under `references/archival/`. v1.0 (2000-09-20) and v2.0 (2010) params are already verified in-repo (§6), so the open question is strictly pre-2000-09-20.
 Closer to home (22 Oct): the mailbox surveys point to the private `factorable/secp256k1` repository and Nadia's Slack for original code. The readable rump slides have now been reviewed locally but not redistributed. Remaining attachment leads include `compute-all-the-keys.png` (Aug 2019) and an unidentified `paper.pdf` forwarded June 2022; its subject matter is unknown. Private mail links are redacted; dates, subjects and filenames remain in `references/crypto2019-rump/`. Confirm permission before publishing further correspondence or attachments.
 
 ### 4.5b Re-run the full 2020 sect\*k1 grid — DONE 23 Oct 2026, every curve matches
@@ -125,6 +125,7 @@ HANDOFF.md                 this file
 notes/plan.md              hypotheses H1–H4 and the six-step plan, with steps 1–2 marked done
 notes/record.md            full computational record (§7, 7.1, 7.2; §7.3 = the 20 Oct second-session experiments)
 notes/base-point-brief.md  older hand-off brief (superseded where it disagrees with plan.md)
+notes/archival.md          §4.5 archival pass: decision rule, standards timeline, target catalog with URLs/reachability, and the fetch list (retrieval blocked in-sandbox)
 scripts/secg_scan.py       SEC 2 prime-curve scan (pure Python, ~2 min for all ten)
 scripts/secg_core_search.py core-matched dictionary search (STRINGS=strings|strings_certicom selects the set)
 scripts/nibble_rules.py    brute-force of last-nibble acceptance rules
