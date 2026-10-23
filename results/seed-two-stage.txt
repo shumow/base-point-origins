@@ -1,0 +1,34 @@
+Stage-2-hashes-the-seed, with candidate seeds (HANDOFF §4.2(b))
+======================================================================
+A seed counts only if it clears BOTH stages. Stage 1 (seed -> V) is the
+§3.2/§4.1 search, already 0 hits over these corpora; it is re-run here
+jointly with stage 2 so no half-match is mistaken for a hit.
+stage-1 hashes: ['sha1', 'sha0', 'ripemd160', 'sha1(sha1)', 'sha1(md5)']
+stage-2 hashes: ['sha1', 'md5', 'ripemd160', 'sha1(sha1)']   high limbs: ['0x3b', '0x554123b']
+wide hashes (unified): ['sha256', 'sha512', 'sha1||sha1(x||1)']
+
+
+candidate seed-encodings: 13910
+stage-1 checks 904,150 -> 0 hit(s)  (expected 0; matches §4.1)
+stage-2 checks 655,216,640 -> 0 high-limb hit(s)
+unified  checks 32,410,300 -> 0 hit(s)
+JOINT (same seed clears both stages): 0 hit(s)
+
+Reading the stage-2 count: the limbs are matched as full 32-bit words,
+0x0000003b (224/256k1, 26 leading zero bits) and 0x0554123b (192k1), each a
+~2^-32 event; 655,216,640 checks give ~0.15 expected spurious per target.
+So stage 2 is itself discriminating here, not a 1-in-64 nibble match, and a
+hit would carry weight -- but it is only evidence on a seed that ALSO clears
+stage 1 (a JOINT hit). A narrower low-6-bit reading of 0x3b was deliberately
+not used: at 1/64 it would carry no information.
+    of 0 stage-2 hits: 0 are 0x0000003b, 0 are 0x0554123b.
+
+CONCLUSION
+  No candidate seed clears both stages, and no seed reproduces a full value
+  as a window of one wide hash. Stage 1 is 0 hits (as in §4.1), so the
+  seed-input two-stage construction has no seed to stand on in this corpus;
+  and stage 2's 32-bit limbs went unseen across 655M checks (~0.3 expected).
+  With §7.3.8 and §7.3.9, the counter-before-hash family is now closed over every
+  testable seed/digest input. A seed OUTSIDE this corpus (a long or machine
+  input) stays beyond reach by construction -- stage 1 already said a short
+  human string is not it. The high material still reads as a hand tag (§7.3.7).
