@@ -112,6 +112,31 @@ vendored table is contested: std-curves gives wtls7 to secp160r1, OpenSSL gives
 it secp160r2's parameters (finding 3 above); the parameter cross-check itself is
 unaffected, since it compares SECG entries by SECG name, not by alias.
 
+## DiSSECT checked for base-point provenance (done 23 Oct 2026)
+
+`crocs-muni/DiSSECT` (the CRoCS curve-analysis framework behind
+dissect.crocs.fi.muni.cz) was added (git-readable) and searched for any stated
+derivation of the base points. **Finding: none.** It carries no prose provenance
+notes and no derivation; greps for "Koblitz", "seed", "ANSI", "Certicom" hit only
+utility code, and its curve database is the same neuromancer/std-curves catalog
+already vendored and cross-checked (no `.gitmodules`; README: "taken from our
+sister project neuromancer.sk/std"), so it adds no new parameter data.
+
+What DiSSECT *does* contribute is analytic, and it is directly on point: the
+trait `dissect/traits/multiples_x.py` independently formalises this project's
+scan — for k = 1..10 it computes the bitlength of x of (1/k mod n)·G and the
+"difference" from the group bitlength. At **k = 2 this is x(G/2)**, the
+half-generator. `scripts/dissect_multiples_x.py` (controls
+`tests/test_dissect_multiples_x.py`) transcribes the trait and confirms its k=2
+value equals the recorded x(G/2) on secp160k1/192k1/224k1/256k1 and K-163; on
+secp256k1 only k=2 is short (166 bits, ~90 below the group) while k=1,3..10 are
+full-size. So the CRoCS group's public trait measures exactly the short
+half-generator anomaly this repo studies — independent corroboration that the
+coordinate is anomalous — but, like every public source surveyed, it records the
+anomaly without a derivation. Related structure traits worth a look in their live
+database (not fetchable here): `hamming_x` (low-Hamming-weight x-coordinates) and
+`x962_invariant` (a³/b², the X9.62 curve invariant; 0 on the a=0 k-curves).
+
 ## Network constraint (why the fetch step is not done here)
 
 WebSearch works, but WebFetch in this environment resolves only GitHub and

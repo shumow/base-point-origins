@@ -130,6 +130,7 @@ scripts/secg_scan.py       SEC 2 prime-curve scan (pure Python, ~2 min for all t
 scripts/secg_core_search.py core-matched dictionary search (STRINGS=strings|strings_certicom selects the set)
 scripts/nibble_rules.py    brute-force of last-nibble acceptance rules
 scripts/crosscheck_stdcurves.py  cross-checks all SECG params against vendored J08nY/std-curves; 26 curves, 0 mismatches (→ results/crosscheck-stdcurves.txt; references/std-curves/; tests/test_crosscheck.py)
+scripts/dissect_multiples_x.py   reconciles this repo's x(G/2) with crocs-muni/DiSSECT's multiples_x trait (k=2); confirms the CRoCS trait measures the same anomaly (→ results/dissect-multiples-x.txt; tests/test_dissect_multiples_x.py; notes/archival.md "DiSSECT checked")
 scripts/high_bytes_analysis.py  §4.2: structure of the four secp*k1 x(G/2) and the top-byte/192k1-prefix exclusions (→ results/high-bytes-analysis.txt; tests/test_high_bytes.py)
 scripts/counter_before_hash.py  §4.2(b): models a counter in the hash input; excludes it as the source of the top byte (→ results/counter-before-hash.txt, results/counter-before-hash-probe.json; tests/test_counter_before_hash.py)
 scripts/counter_second_hash.py  §4.2(b): models the two-stage counter-before-second-hash variant on the digest; unsupported (→ results/counter-second-hash.txt; tests/test_counter_second_hash.py)
