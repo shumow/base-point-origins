@@ -56,8 +56,9 @@ secp*k1 half-generators x(G/2), recomputed from the published G:
      top byte 0x48: low nibbles that lift = [0, 1, 2, 3, 6, 12, 13, 15]  <- includes the published nibble 2
      top byte 0x78: low nibbles that lift = [0, 1, 3, 4, 5, 6, 8, 9, 10, 11, 14]
    Reading: both top bytes admit on-curve points, so 0x48 was not forced by
-   lifting. The 0x30 clear is a deliberate 2-bit edit to V's top byte, applied
-   only on the one curve that carries no high material. No field-level cause.
+   lifting, by reduction mod p, or by bit length. No field-level cause found;
+   a deliberate 2-bit edit to V's top byte on the one curve without high
+   material is the simplest reading, not an established one.
 
 5. Is the high material a counter, date, or function of the curve parameters?
    values in generation-size order: 160k1->(none), 224k1->0x3b, 256k1->0x3b, 192k1->0x554123b
@@ -71,7 +72,10 @@ secp*k1 half-generators x(G/2), recomputed from the published G:
      secp256k1: p mod 2^32=0xfffffc2f, n mod 2^32=0xd0364141, 2^f - p (Mersenne offset)=0x1000003d1, b=0x7
    None of 0x3b, 0x55412, 0x554123b equals any curve's Mersenne offset,
    low word of p or n, trace, or b (see the table). As a Unix time 0x554123b
-   = 89,395,771 s is 31 Oct 1972, not 1997-2000. No counter/date/parameter fit.
+   = 89,395,771 s is 31 Oct 1972, not 1997-2000. So: not a Unix date, not a
+   free-running per-curve counter (224 = 256), and not one of the five raw
+   parameter quantities tried. Arbitrary other functions of p or n are not
+   excluded by this -- only those five.
 
 6. Is V (or a full value) a hash of the curve's own p or n?
    3 algorithms x 6 encodings x 4 curves, 160/128-bit windows,
@@ -87,9 +91,11 @@ secp*k1 half-generators x(G/2), recomputed from the published G:
    795f9c6?]; the sixth word is 0x0000003b (224/256), 0x0554123b (192), or
    absent (160k1, whose top word's high byte is 0x48 not 0x78).
    If the sixth word were uninitialised buffer or a free-running counter it
-   would differ between runs; instead secp224k1 and secp256k1 carry the
-   identical 0x3b and share it as the low byte of secp192k1's word. A value
-   that repeats across independent curve generations is assigned, not leftover.
+   would be expected to differ between runs; instead secp224k1 and secp256k1
+   carry the identical 0x3b and share it as the low byte of secp192k1's word.
+   That disfavours leftover or free-running values. It does not exclude a
+   counter restarted for each run, or buffer state reused between runs, both
+   of which would repeat too; a value assigned by hand is the simplest reading.
 
 SUMMARY
   * One 160-bit block V = 78ce563f89a0ed9414f5aa28ad0d96d6795f9c6? underlies all
@@ -98,10 +104,16 @@ SUMMARY
     last nibble 3. A chosen x reused verbatim across two fields.
   * The high material above V is 0x3b on 192/224/256 (0x55412 extra on 192) and
     absent on 160k1, which instead has 0x30 cleared from V's top byte.
-  * Excluded for the high material: FIPS/X9.62 expansion (single-seed
-    contradiction + weight), field-size truncation (192 > 224/256 in prefix),
-    a per-curve counter (224=256), a date, and a function of p/n/trace/b.
-  * The top-byte 0x30 clear is a deliberate 2-bit edit, not forced by the field.
-  * Bet: the high bytes are small hand-assigned tags written into the top limb
-    of a fixed-width buffer holding V, not a computed quantity. 0x3b (=';'=59)
-    shared by three curves is the single sub-constant most worth identifying.
+  * Excluded exactly: FIPS/X9.62 field-element expansion from one seed (the
+    single-seed contradiction, plus the weight argument) and truncation of one
+    long constant to field size (192 carries more prefix than 224/256).
+  * Disfavoured or tested only in a bounded form: a free-running per-curve
+    counter or leftover buffer (224 = 256 repeats; a restarted counter or
+    reused buffer state would too), a Unix date, the five raw parameter
+    quantities tried (not arbitrary functions of p or n), and SHA-1/MD5/SHA-256
+    of p or n in six encodings.
+  * The top-byte 0x30 clear on 160k1 is not forced by the field; a deliberate
+    2-bit edit is the simplest reading.
+  * Working hypothesis, not a result: the high bytes are small hand-assigned
+    tags written into the top limb of a fixed-width buffer holding V. 0x3b
+    (=';'=59) shared by three curves is the sub-constant most worth identifying.

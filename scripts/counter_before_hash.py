@@ -10,19 +10,26 @@ This script does three things, run from the repository root:
     python3 scripts/counter_before_hash.py            # model + demonstration
     python3 scripts/counter_before_hash.py --probe     # also run the bounded search
 
-  A. The structural result. The four values share bits 4..155 exactly (152
-     bits). If value = HASH(input), that forces one shared input, which forces
-     the differing nibble at bits 156..159 (4 vs 7) to match too. So the top
-     byte is NOT hash output under ANY counter-before-hash scheme; it is a
-     post-hash edit. Proven, then shown by simulation: a per-curve acceptance
-     loop yields statistically independent digests, nowhere near a shared core.
+  A. The heuristic argument. The four values share bits 4..155 exactly (152
+     bits). If value = HASH(input), then under an independent-hash heuristic two
+     different inputs agree on 152 bits with probability ~2^-152, so the four
+     almost certainly share one hashed input, and one input gives one output
+     everywhere -- including bits 156..159, which differ (4 vs 7). The likely
+     reading is a post-hash edit. This is probabilistic, not a proof: a 152-bit
+     projection is many-to-one and nothing makes it injective. A small
+     simulation of per-curve acceptance loops illustrates it; it cannot
+     establish impossibility.
 
-  B. The top nibble / high material as a post-hash counter: enumerated, and no
-     single function of the field reproduces {160k1, 192k1, 224k1, 256k1}.
+  B. The top nibble / high material as a post-hash counter or tag: enumerated;
+     no monotone function of the field size reproduces {160k1, 192k1, 224k1,
+     256k1}, and 224 = 256 disfavours a free-running per-curve counter (a
+     counter restarted per run, or reused buffer state, would repeat and is
+     not excluded).
 
   C. --probe: a bounded counter-before-hash dictionary pass over the Certicom
      wordlist, sweeping a counter in the INPUT (the dimension §3/§4.1 did not),
-     matched against the 148-bit core. Honestly scoped, with a manifest.
+     matched against the core. Its domain is explicit and recorded in a
+     manifest; it is a negative over that domain only, independent of A.
 
 Pure standard library plus the repo's hash helpers.
 """
@@ -84,29 +91,34 @@ def main(do_probe):
     say()
 
     # ---- A. the structural result ----------------------------------------
-    say("A. Structural result: the top byte cannot be hash output")
+    say("A. Heuristic argument: the top nibble is unlikely to be hash output")
     say("   All four share bits 4..155 (152 bits). The differing part the name calls")
     say("   the 'top byte' is really the nibble at bits 156..159: 0x4 on secp160k1,")
     say("   0x7 on the other three (bits 152..155 = 0x8 are shared, inside the core).")
     say("   Let value_k = HASH(input_k) for curve k, input_k = seed with a counter")
-    say("   folded in (any encoding above). A good hash makes bits 4..155 of its")
-    say("   output a function of the whole input with full avalanche, so:")
-    say("     bits 4..155 equal across all four  =>  input_k all equal (else a")
-    say("     152-bit coincidence, probability ~2^-152 per pair), and equal input")
-    say("     gives equal output EVERYWHERE, including bits 156..159.")
-    say("   But bits 156..159 are 4 vs 7. Contradiction. Therefore under EVERY")
-    say("   counter-before-hash scheme the differing nibble is a POST-hash edit;")
-    say("   the counter-in-the-input can produce the shared digest, never the split.")
+    say("   folded in (any encoding above). Projection onto 152 bits is many-to-one,")
+    say("   so equal projections do NOT prove equal inputs. But under an")
+    say("   independent-hash heuristic two different inputs agree on bits 4..155 with")
+    say("   probability ~2^-152 per pair, so with overwhelming likelihood the four")
+    say("   share one hashed input -- and one input gives one output everywhere,")
+    say("   including bits 156..159, which are 4 vs 7. The likely reading: the")
+    say("   differing nibble is a post-hash edit, and a counter in the input, if there")
+    say("   was one, produced only the shared digest. This is a probabilistic")
+    say("   heuristic, not a proof, and it is separate from the bounded probe in C.")
     say()
 
-    # ---- A'. demonstration: no counter-before-hash outcome shows the signature
-    say("A'. Demonstration: the observed signature never arises")
+    # ---- A'. illustration: the signature does not arise in a sample of runs
+    say("A'. Illustration (a sample, not an impossibility result)")
     say("    The observed signature is a PAIR of curves whose low 152 bits (bits 4..155)")
     say("    are equal WHILE the top nibble (bits 156..159) differs. Model: for each")
     say("    curve, i = 0,1,2,... ; D = SHA1(seed || i_be4); accept the first D that")
-    say("    lifts to a point. Two outcomes are possible and neither is the signature:")
-    say("    curves land on the same i (identical FULL digest, top nibble included), or")
-    say("    on different i (independent digests). Count signature pairs across seeds.")
+    say("    lifts to a point. The two outcomes seen are: curves land on the same i")
+    say("    (identical FULL digest, top nibble included), or on different i")
+    say("    (independent digests). Count signature pairs across seeds.")
+    M160 = (1 << 160) - 1
+    real_pairs = sum(1 for a in K1 for b in K1 if a < b
+                     and window_156(xs[a] & M160) == window_156(xs[b] & M160)
+                     and (xs[a] >> 156 & 0xF) != (xs[b] >> 156 & 0xF))
     import random
     rng = random.Random(42)
     seeds = [b"Certicom", b"secp", b"Koblitz", b"SEC2"] + \
@@ -132,10 +144,12 @@ def main(do_probe):
                     sig_pairs += 1          # the observed signature
     say(f"    {len(seeds)} seeds, {total_pairs} curve-pairs examined.")
     say(f"    pairs matching the observed signature (shared 152-bit core, DIFFERENT top")
-    say(f"    nibble) = {sig_pairs}.  (The real data has this on all three pairs within")
-    say(f"    {{192,224,256}} and between them and 160k1 -- 5 of 6 pairs.)")
-    say("    => counter-before-hash yields either an identical digest (same top nibble")
-    say("       too) or an independent one; it never produces shared-low/split-top.")
+    say(f"    nibble) = {sig_pairs}.  (The real data shows it on {real_pairs} of 6 pairs:")
+    say("    secp160k1 against each of the other three; the pairs among 192/224/256")
+    say("    share the top nibble 7 as well as the core, so they are not the signature.)")
+    say("    => in this sample, counter-before-hash yields either an identical digest")
+    say("       (same top nibble too) or an independent one. A sample of 64 seeds")
+    say("       illustrates the heuristic in A; it does not rule the signature out.")
     say()
 
     # ---- B. the top nibble / high material as a post-hash counter ---------
@@ -146,9 +160,11 @@ def main(do_probe):
     say("    secp224k1 and secp256k1: identical tag 0x3b7 over DIFFERENT fields;")
     say("    secp192k1: 0x554123b7, the LARGEST tag over the SMALLEST of the three")
     say("    extended fields; secp160k1: 0x4, no high material. No monotone function")
-    say("    of the field size, and no per-curve counter (224=256), produces this set.")
+    say("    of the field size produces this set, and 224 = 256 disfavours a")
+    say("    free-running per-curve counter. Not excluded: a counter restarted for")
+    say("    each run, or buffer state reused between runs, either of which repeats.")
     say("    The tag tracks which curves reuse a value, not the field -- consistent")
-    say("    with a hand-written limb, not a computed or counted one.")
+    say("    with a hand-written limb, which stays the working hypothesis.")
     say()
 
     probe = None
@@ -156,22 +172,27 @@ def main(do_probe):
         probe = run_probe()
 
     say("CONCLUSION")
-    say("  Counter-before-hash is modelled and excluded as the SOURCE OF THE TOP BYTE:")
-    say("  the shared 152-bit core forces a single hashed input, which cannot also")
-    say("  yield a different top nibble. A counter in the input can only explain the")
-    say("  shared digest; the 0x78->0x48 edit on secp160k1 (and the 0x3b / 0x554123b")
-    say("  high material) is a post-hash step, matching the §7.3.7 'hand-assigned tag'")
-    say("  reading. What remains genuinely untested is a counter before a SECOND hash")
-    say("  or transform applied to the digest -- a different, more baroque hypothesis.")
+    say("  Counter-before-hash as the SOURCE OF THE TOP BYTE is disfavoured, not")
+    say("  disproved: under the independent-hash heuristic the shared 152-bit core")
+    say("  points to a single hashed input, which would give one top nibble, so the")
+    say("  0x78->0x48 edit on secp160k1 (and the 0x3b / 0x554123b high material) most")
+    say("  likely happened after the hash -- consistent with the §7.3.7 working")
+    say("  hypothesis of hand-assigned tags, which this does not establish. A counter")
+    say("  in the input could still explain the shared digest itself. Separately,")
+    say("  the bounded probe below is a negative over its stated domain only.")
+    say("  Untested here: a counter before a SECOND hash or transform of the digest")
+    say("  (modelled next, counter_second_hash.py) and any input outside the probe.")
     if probe is not None:
-        say(f"  The bounded input-counter probe added {probe['evaluations']:,} evaluations "
-            f"over the Certicom list: {len(probe['hits'])} hit(s).")
+        say(f"  The bounded input-counter probe: {probe['evaluations']:,} evaluations over "
+            f"{probe['words']} Certicom base strings, counter 0..{probe['counter_range'][1]}, "
+            f"{len(probe['encodings'])} encodings, {len(probe['placements'])} placements, "
+            f"hashes {probe['algorithms']}: {len(probe['hits'])} hit(s) on the core.")
     return probe
 
 
 # fast (OpenSSL) 160-bit hashes for the probe; pure-Python SHA-0 is left out for
-# time. The structural result in A excludes the hypothesis regardless of the
-# dictionary, so the probe only needs to sweep the input-counter dimension.
+# time. The probe is a bounded negative over exactly the domain in its manifest;
+# it stands on its own and does not rely on the heuristic in A.
 PROBE_HASHES = {
     "sha1": lambda b: hashlib.sha1(b).digest(),
     "ripemd160": lambda b: hashlib.new("ripemd160", b).digest(),
@@ -219,9 +240,9 @@ def run_probe():
         note=("Bounded: base strings only (no case/punctuation variants), counter "
               "0..127, two encodings, six input placements, two OpenSSL 160-bit "
               "hashes (SHA-0 omitted for time). This sweeps the input-counter "
-              "dimension omitted by §3/§4.1, not an exhaustive search; the "
-              "structural result in A excludes the hypothesis independent of any "
-              "dictionary."))
+              "dimension omitted by §3/§4.1; it is a negative over this domain "
+              "only, not an exhaustive search and not a proof about inputs "
+              "outside it."))
     say(f"    {n:,} evaluations over {len(words)} base strings, counter 0..{COUNTER_MAX-1}, "
         f"{len(ENCS)} encodings, {len(placements)} placements, {len(PROBE_HASHES)} hashes: "
         f"{len(hits)} hit(s).")

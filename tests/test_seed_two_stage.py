@@ -1,11 +1,15 @@
 """Positive controls for scripts/seed_two_stage.py (HANDOFF §4.2(b), stage 2
 hashing the seed). The script reports an all-negative joint search; these
-controls show each arm WOULD surface a planted answer, so the negative holds."""
+controls show each arm WOULD surface a planted answer, and that a planted joint
+hit driven through the production entry point `main` comes back as a byte-exact
+witness (seed bytes, both stages' construction), so the negative holds and a
+positive would be reproducible."""
 import hashlib
 import os
 import struct
 import sys
 import unittest
+from unittest.mock import patch
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
@@ -30,11 +34,13 @@ class Windows(unittest.TestCase):
 
 
 class Stage2Encoders(unittest.TestCase):
-    def test_counter_inputs_distinct_and_contain_the_counter(self):
-        msgs = [list(sts.stage2_inputs(b"seed", i)) for i in range(32)]
+    def test_counter_inputs_distinct_named_and_contain_the_counter(self):
+        msgs = [[m for _, m in sts.stage2_inputs(b"seed", i)] for i in range(32)]
         flat = {m for group in msgs for m in group}
         self.assertEqual(len(flat), 32 * 4)                  # 4 placements, all distinct
-        self.assertIn(b"seed" + struct.pack(">I", 7), list(sts.stage2_inputs(b"seed", 7)))
+        named = dict(sts.stage2_inputs(b"seed", 7))
+        self.assertEqual(named["seed||be4"], b"seed" + struct.pack(">I", 7))
+        self.assertEqual(named["be4||seed"], struct.pack(">I", 7) + b"seed")
 
 
 class PlantedStage2Limb(unittest.TestCase):
@@ -44,9 +50,9 @@ class PlantedStage2Limb(unittest.TestCase):
         target = dict(cs.word_readings(sts.H2[hname](msg)))["be_word1"]
         found = None
         for i in range(3000):
-            for m in sts.stage2_inputs(seed, i):
+            for pname, m in sts.stage2_inputs(seed, i):
                 for rname, w in cs.word_readings(sts.H2[hname](m)):
-                    if w == target and rname == "be_word1" and m == seed + struct.pack(">I", i):
+                    if w == target and rname == "be_word1" and pname == "seed||be4":
                         found = i
             if found is not None:
                 break
@@ -66,6 +72,55 @@ class CandidateSeeds(unittest.TestCase):
         self.assertIn("wl", labels)
         self.assertIn("secp256k1.p", labels)
         self.assertIn("secp192k1.n_dec", labels)
+
+
+class PlantedJointThroughMain(unittest.TestCase):
+    """Drive the production entry point with a seed planted to clear both stages:
+    stage 1 by making the core matcher fire on SHA-1(seed) (the real matcher's
+    target is the published core, which no short string hits), stage 2 by adding
+    a 32-bit window of SHA-1(seed||be4(7)) to the high-limb targets. The report
+    and the returned witness must name the seed bytes and both constructions."""
+
+    def test_main_returns_a_byte_exact_witness_for_a_planted_joint_hit(self):
+        planted_text = "Planted Seed 2026"
+        seed = planted_text.encode("ascii")
+        d1 = hashlib.sha1(seed).digest()
+
+        def fake_check(d):
+            return "sha1 core (planted)" if d == d1 else None
+
+        counter, placement = 7, "seed||be4"
+        msg = seed + struct.pack(">I", counter)
+        limb = dict(cs.word_readings(hashlib.sha1(msg).digest()))["be_word1"]
+        t32 = dict(cs.T32)
+        t32[limb] = "planted limb"
+
+        before = len(sts.out_lines)
+        with patch.object(sts.core, "check", fake_check), patch.object(sts.cs, "T32", t32):
+            res = sts.main(seeds=[("wl", "another word"), ("wl", planted_text)],
+                           counter_max=16, encs=("ascii",))
+        report = "\n".join(sts.out_lines[before:])
+
+        self.assertEqual(len(res["joint_hits"]), 1)
+        j = res["joint_hits"][0]
+        self.assertEqual(j["input_hex"], seed.hex())
+        self.assertEqual(j["text"], planted_text)
+        self.assertEqual(j["enc"], "ascii")
+        s1 = [h for h in j["stage1"] if h["hash"] == "sha1" and h["suffix_hex"] == ""]
+        self.assertEqual(len(s1), 1)
+        self.assertEqual(s1[0]["msg_hex"], seed.hex())
+        self.assertEqual(s1[0]["reading"], "sha1 core (planted)")
+        s2 = [h for h in j["stage2"] if h["hash"] == "sha1" and h["placement"] == placement
+              and h["reading"] == "be_word1" and h["counter"] == counter]
+        self.assertEqual(len(s2), 1)
+        self.assertEqual(s2[0]["msg_hex"], msg.hex())
+        self.assertEqual(s2[0]["limb"], f"{limb:#010x}")
+        # the printed report carries the same witness, so stdout alone reproduces it
+        self.assertIn(f"JOINT HIT input_hex={seed.hex()}", report)
+        self.assertIn(f"counter={counter} msg_hex={msg.hex()}", report)
+        # the other candidate is not reported as anything
+        self.assertNotIn("another word".encode().hex(), report)
+        self.assertEqual(res["stage1_hits"][0]["input_hex"], seed.hex())
 
 
 if __name__ == "__main__":

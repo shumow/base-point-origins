@@ -205,11 +205,16 @@ def main(do_slow):
     else:
         say("  No plain transform of V, no window of H2(V), and no small-counter second")
         say("  hash H2(V||i) reproduces the 32-bit high limbs 0x0000003b / 0x0554123b,")
-        say("  and no single recipe yields both. The counter-before-second-hash variant")
-        say("  is not supported in the digest-input, small-counter regime. With §7.3.8")
-        say("  (counter in stage 1) already excluded, the high material still reads as a")
-        say("  hand-assigned tag (§7.3.7), not a computed one. Only the seed-input form")
-        say("  of stage 2 remains beyond reach.")
+        say("  and no single recipe yields both. This is a bounded negative over an")
+        say(f"  explicit domain: {len(V_FORMS)} V forms, hashes {list(H2)}, the five")
+        say(f"  placements above, counters below {FAST_N} (fast) / {SLOW_N} (slow), and")
+        say("  the 32-bit readings listed. It does not cover other transforms, hashes,")
+        say("  placements or larger counters. With §7.3.8 (a counter in stage 1,")
+        say("  disfavoured on a heuristic, probed over a bounded dictionary) the")
+        say("  two-stage digest-input variant is unsupported where tested; the working")
+        say("  hypothesis for the high material stays a hand-assigned tag (§7.3.7),")
+        say("  which this does not establish. The seed-input form of stage 2 is")
+        say("  modelled over candidate seeds in seed_two_stage.py.")
     return hits, joint
 
 

@@ -27,5 +27,5 @@
   "hits": [],
   "input_sequence_sha256": "7035c141b3ff70edd3cca711a52f1d7ee176a9c158c86cc96e52dc0a021d8f0f",
   "python_version": "3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]",
-  "note": "Bounded: base strings only (no case/punctuation variants), counter 0..127, two encodings, six input placements, two OpenSSL 160-bit hashes (SHA-0 omitted for time). This sweeps the input-counter dimension omitted by \u00a73/\u00a74.1, not an exhaustive search; the structural result in A excludes the hypothesis independent of any dictionary."
+  "note": "Bounded: base strings only (no case/punctuation variants), counter 0..127, two encodings, six input placements, two OpenSSL 160-bit hashes (SHA-0 omitted for time). This sweeps the input-counter dimension omitted by \u00a73/\u00a74.1; it is a negative over this domain only, not an exhaustive search and not a proof about inputs outside it."
 }

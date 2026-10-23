@@ -144,8 +144,9 @@ def main():
         say(f"     top byte {tb:#04x}: low nibbles that lift = {lifts}"
             + ("  <- includes the published nibble 2" if 2 in lifts else ""))
     say("   Reading: both top bytes admit on-curve points, so 0x48 was not forced by")
-    say("   lifting. The 0x30 clear is a deliberate 2-bit edit to V's top byte, applied")
-    say("   only on the one curve that carries no high material. No field-level cause.")
+    say("   lifting, by reduction mod p, or by bit length. No field-level cause found;")
+    say("   a deliberate 2-bit edit to V's top byte on the one curve without high")
+    say("   material is the simplest reading, not an established one.")
     say()
 
     # ---- 5. high material vs curve parameters & counters -----------------
@@ -172,7 +173,10 @@ def main():
                                       if v < (1 << 40)))
     say("   None of 0x3b, 0x55412, 0x554123b equals any curve's Mersenne offset,")
     say("   low word of p or n, trace, or b (see the table). As a Unix time 0x554123b")
-    say("   = 89,395,771 s is 31 Oct 1972, not 1997-2000. No counter/date/parameter fit.")
+    say("   = 89,395,771 s is 31 Oct 1972, not 1997-2000. So: not a Unix date, not a")
+    say("   free-running per-curve counter (224 = 256), and not one of the five raw")
+    say("   parameter quantities tried. Arbitrary other functions of p or n are not")
+    say("   excluded by this -- only those five.")
     say()
 
     # ---- 6. structured-hash check (seeded from the curve's own numbers) --
@@ -226,9 +230,11 @@ def main():
     say("   795f9c6?]; the sixth word is 0x0000003b (224/256), 0x0554123b (192), or")
     say("   absent (160k1, whose top word's high byte is 0x48 not 0x78).")
     say("   If the sixth word were uninitialised buffer or a free-running counter it")
-    say("   would differ between runs; instead secp224k1 and secp256k1 carry the")
-    say("   identical 0x3b and share it as the low byte of secp192k1's word. A value")
-    say("   that repeats across independent curve generations is assigned, not leftover.")
+    say("   would be expected to differ between runs; instead secp224k1 and secp256k1")
+    say("   carry the identical 0x3b and share it as the low byte of secp192k1's word.")
+    say("   That disfavours leftover or free-running values. It does not exclude a")
+    say("   counter restarted for each run, or buffer state reused between runs, both")
+    say("   of which would repeat too; a value assigned by hand is the simplest reading.")
     say()
 
     # ---- summary ---------------------------------------------------------
@@ -239,13 +245,19 @@ def main():
     say("    last nibble 3. A chosen x reused verbatim across two fields.")
     say("  * The high material above V is 0x3b on 192/224/256 (0x55412 extra on 192) and")
     say("    absent on 160k1, which instead has 0x30 cleared from V's top byte.")
-    say("  * Excluded for the high material: FIPS/X9.62 expansion (single-seed")
-    say("    contradiction + weight), field-size truncation (192 > 224/256 in prefix),")
-    say("    a per-curve counter (224=256), a date, and a function of p/n/trace/b.")
-    say("  * The top-byte 0x30 clear is a deliberate 2-bit edit, not forced by the field.")
-    say("  * Bet: the high bytes are small hand-assigned tags written into the top limb")
-    say("    of a fixed-width buffer holding V, not a computed quantity. 0x3b (=';'=59)")
-    say("    shared by three curves is the single sub-constant most worth identifying.")
+    say("  * Excluded exactly: FIPS/X9.62 field-element expansion from one seed (the")
+    say("    single-seed contradiction, plus the weight argument) and truncation of one")
+    say("    long constant to field size (192 carries more prefix than 224/256).")
+    say("  * Disfavoured or tested only in a bounded form: a free-running per-curve")
+    say("    counter or leftover buffer (224 = 256 repeats; a restarted counter or")
+    say("    reused buffer state would too), a Unix date, the five raw parameter")
+    say("    quantities tried (not arbitrary functions of p or n), and SHA-1/MD5/SHA-256")
+    say("    of p or n in six encodings.")
+    say("  * The top-byte 0x30 clear on 160k1 is not forced by the field; a deliberate")
+    say("    2-bit edit is the simplest reading.")
+    say("  * Working hypothesis, not a result: the high bytes are small hand-assigned")
+    say("    tags written into the top limb of a fixed-width buffer holding V. 0x3b")
+    say("    (=';'=59) shared by three curves is the sub-constant most worth identifying.")
 
     failures = []
     if not same_core:

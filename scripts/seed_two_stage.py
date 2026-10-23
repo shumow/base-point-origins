@@ -1,5 +1,5 @@
 """Model stage 2 hashing the SEED, with candidate seeds (HANDOFF §4.2(b), the
-last branch §7.3.9 left untestable).
+branch §7.3.9 could not test).
 
 §7.3.9 tested the two-stage construction with stage 2 hashing the DIGEST V (known)
 and found nothing. The branch it could not reach: stage 2 hashes the unknown SEED,
@@ -12,6 +12,15 @@ counts if it does BOTH: produce V at stage 1 AND a high limb at stage 2. Stage 1
 alone is the §3.2/§4.1 dictionary search, already 0 hits over the Certicom and
 NIST corpora; this harness re-runs it jointly with stage 2 so a seed that passed
 only one stage is never mistaken for a solution.
+
+This is a BOUNDED search: a fixed candidate corpus (the Certicom wordlist and the
+six curves' own parameters), a fixed set of hashes, placements, counters and
+32-bit readings. A negative says no seed in that domain fits; it does not exclude
+the construction for seeds, hashes or counters outside it.
+
+Every hit is reported as a byte-exact witness: the seed bytes (input_hex), the
+stage-1 hash and suffix, the stage-2 hash, placement, reading and counter and the
+exact bytes hashed, so a positive can be reproduced from the report alone.
 
 Candidate seeds: the Certicom wordlist (the established corpus) and the six
 curves' own parameters. Run from the repository root:
@@ -58,6 +67,8 @@ WIDE = {                         # wide hashes for the unified window model
     "sha512": lambda b: hashlib.sha512(b).digest(),
     "sha1||sha1(x||1)": lambda b: hashlib.sha1(b).digest() + hashlib.sha1(b + b"\x01").digest(),
 }
+DEFAULT_COUNTER_MAX = 256
+DEFAULT_ENCS = ("ascii", "utf-16-le")
 
 out_lines = []
 
@@ -73,10 +84,11 @@ def stage1_suffixes():
 
 
 def stage2_inputs(seed: bytes, i: int):
-    yield seed + struct.pack(">I", i)
-    yield seed + bytes([i & 0xFF])
-    yield seed + str(i).encode()
-    yield struct.pack(">I", i) + seed
+    """(placement name, bytes hashed) for a counter i folded into the seed."""
+    yield "seed||be4", seed + struct.pack(">I", i)
+    yield "seed||be1", seed + bytes([i & 0xFF])
+    yield "seed||dec", seed + str(i).encode()
+    yield "be4||seed", struct.pack(">I", i) + seed
 
 
 def windows(digest: int, dbits: int, width: int):
@@ -99,57 +111,72 @@ def candidate_seeds():
         yield (name + ".n_dec", str(c.n))
 
 
-def main():
+def main(seeds=None, counter_max=DEFAULT_COUNTER_MAX, encs=DEFAULT_ENCS):
+    """Run the joint search. `seeds` is an iterable of (label, text) and defaults to
+    candidate_seeds(); tests pass a planted one. Returns a dict with the witness
+    lists stage1_hits, stage2_hits, joint_hits, unified_hits and the check counts.
+    Each witness carries label, text, enc and input_hex (the exact seed bytes),
+    plus the stage's hash / suffix or placement / reading / counter / bytes hashed."""
     say("Stage-2-hashes-the-seed, with candidate seeds (HANDOFF §4.2(b))")
     say("=" * 70)
     say("A seed counts only if it clears BOTH stages. Stage 1 (seed -> V) is the")
     say("§3.2/§4.1 search, already 0 hits over these corpora; it is re-run here")
     say("jointly with stage 2 so no half-match is mistaken for a hit.")
-    say(f"stage-1 hashes: {list(H1)}")
-    say(f"stage-2 hashes: {list(H2)}   high limbs: {[hex(t) for t in cs.T32]}")
-    say(f"wide hashes (unified): {list(WIDE)}")
+    say(f"stage-1 hashes: {list(H1)}   suffixes: {len(stage1_suffixes())} (X9.62-style)")
+    say(f"stage-2 hashes: {list(H2)}   placements: {[p for p, _ in stage2_inputs(b'x', 0)]}   "
+        f"counters: 0..{counter_max - 1}   high limbs: {[hex(t) for t in cs.T32]}")
+    say(f"wide hashes (unified): {list(WIDE)}   encodings: {list(encs)}")
     say()
 
-    COUNTER_MAX = 256
-    ENCS = ("ascii", "utf-16-le")
     s1_hits, s2_hits, joint_hits, uni_hits = [], [], [], []
     n1 = n2 = nu = 0
     nseeds = 0
 
-    for label, text in candidate_seeds():
-        for enc in ENCS:
+    for label, text in (seeds if seeds is not None else candidate_seeds()):
+        for enc in encs:
             try:
                 seed = text.encode(enc)
             except Exception:
                 continue
             nseeds += 1
+            w0 = dict(label=label, text=text, enc=enc, input_hex=seed.hex())
 
             # --- stage 1: does this seed hash to V's core? ---
-            s1 = False
+            s1_here = []
             for suf in stage1_suffixes():
                 for hn, hf in H1.items():
                     n1 += 1
-                    if core.check(hf(seed + suf)):
-                        s1 = True
-                        s1_hits.append((label, enc, hn, suf.hex()))
-                        say(f"  STAGE1 HIT {label} {enc} {hn} suffix={suf.hex()}")
+                    m = core.check(hf(seed + suf))
+                    if m:
+                        s1_here.append(dict(w0, stage=1, hash=hn, suffix_hex=suf.hex(),
+                                            msg_hex=(seed + suf).hex(), reading=m))
+                        say(f"  STAGE1 HIT {s1_here[-1]}")
+            s1_hits.extend(s1_here)
 
             # --- stage 2: does this seed (||counter) give a high limb? ---
             s2_here = []
-            for i in range(COUNTER_MAX):
-                for msg in stage2_inputs(seed, i):
+            for i in range(counter_max):
+                for pname, msg in stage2_inputs(seed, i):
                     for hn, hf in H2.items():
                         d = hf(msg)
                         for rname, w in cs.word_readings(d):
                             n2 += 1
                             if w in cs.T32:
-                                s2_here.append((label, enc, hn, rname, i, hex(w)))
+                                s2_here.append(dict(w0, stage=2, hash=hn, placement=pname,
+                                                    reading=rname, counter=i,
+                                                    limb=f"{w:#010x}", msg_hex=msg.hex()))
             s2_hits.extend(s2_here)
 
             # --- joint: same seed clears both ---
-            if s1 and s2_here:
-                joint_hits.append((label, enc, s2_here[:3]))
-                say(f"  JOINT HIT {label} {enc}: stage1 + stage2 {s2_here[:3]}")
+            if s1_here and s2_here:
+                joint_hits.append(dict(w0, stage1=s1_here, stage2=s2_here))
+                say(f"  JOINT HIT input_hex={seed.hex()} label={label} text={text!r} enc={enc}")
+                for h in s1_here:
+                    say(f"    stage 1: {h['hash']} suffix_hex={h['suffix_hex']!r} "
+                        f"msg_hex={h['msg_hex']} -> {h['reading']}")
+                for h in s2_here:
+                    say(f"    stage 2: {h['hash']} placement={h['placement']} reading={h['reading']} "
+                        f"counter={h['counter']} msg_hex={h['msg_hex']} -> limb {h['limb']}")
 
             # --- unified: the whole value is a window of one wide hash ---
             for hn, hf in WIDE.items():
@@ -161,8 +188,9 @@ def main():
                     for off, w in windows(dint, dbits, width):
                         nu += 1
                         if w == val:
-                            uni_hits.append((label, enc, hn, cname, off))
-                            say(f"  UNIFIED HIT {label} {enc} {hn} {cname} off={off}")
+                            uni_hits.append(dict(w0, hash=hn, curve=cname, offset=off,
+                                                 width=width, digest_hex=d.hex()))
+                            say(f"  UNIFIED HIT {uni_hits[-1]}")
 
     say()
     say(f"candidate seed-encodings: {nseeds}")
@@ -180,27 +208,30 @@ def main():
     say("hit would carry weight -- but it is only evidence on a seed that ALSO clears")
     say("stage 1 (a JOINT hit). A narrower low-6-bit reading of 0x3b was deliberately")
     say("not used: at 1/64 it would carry no information.")
-    n_3b = sum(1 for h in s2_hits if h[-1] == hex(0x0000003b))
-    n_554 = sum(1 for h in s2_hits if h[-1] == hex(0x0554123b))
+    n_3b = sum(1 for h in s2_hits if h["limb"] == "0x0000003b")
+    n_554 = sum(1 for h in s2_hits if h["limb"] == "0x0554123b")
     say(f"    of {len(s2_hits)} stage-2 hits: {n_3b} are 0x0000003b, {n_554} are 0x0554123b.")
     say()
 
     say("CONCLUSION")
     if joint_hits:
-        say(f"  {len(joint_hits)} candidate seed(s) clear BOTH stages -- a real lead; list above.")
+        say(f"  {len(joint_hits)} candidate seed(s) clear BOTH stages -- a real lead; byte-exact witnesses above.")
     elif uni_hits:
-        say(f"  {len(uni_hits)} seed(s) reproduce a full value as a single wide-hash window -- verify.")
+        say(f"  {len(uni_hits)} seed(s) reproduce a full value as a single wide-hash window -- verify (witnesses above).")
     else:
         say("  No candidate seed clears both stages, and no seed reproduces a full value")
-        say("  as a window of one wide hash. Stage 1 is 0 hits (as in §4.1), so the")
-        say("  seed-input two-stage construction has no seed to stand on in this corpus;")
-        say("  and stage 2's 32-bit limbs went unseen across 655M checks (~0.3 expected).")
-        say("  With §7.3.8 and §7.3.9, the counter-before-hash family is now closed over every")
-        say("  testable seed/digest input. A seed OUTSIDE this corpus (a long or machine")
-        say("  input) stays beyond reach by construction -- stage 1 already said a short")
-        say("  human string is not it. The high material still reads as a hand tag (§7.3.7).")
-    return dict(stage1=len(s1_hits), stage2=len(s2_hits), unified=len(uni_hits),
-                joint=len(joint_hits), seeds=nseeds, n1=n1, n2=n2, nu=nu)
+        say("  as a window of one wide hash. This is a bounded negative over an explicit")
+        say(f"  domain: {nseeds} seed-encodings (the Certicom wordlist and the curves' p and n,")
+        say(f"  encodings {list(encs)}), stage-1 hashes {list(H1)} with the X9.62-style")
+        say(f"  suffixes, stage-2 hashes {list(H2)}, four placements, counters below")
+        say(f"  {counter_max}, 32-bit readings, and wide hashes {list(WIDE)}. It says nothing")
+        say("  about seeds outside that corpus, other hashes, or larger counters. Stage 1")
+        say("  alone is 0 hits here, as in §4.1. Together with §7.3.8 and §7.3.9 the")
+        say("  seed-input two-stage construction is unsupported in every domain tested so")
+        say("  far; the working hypothesis for the high material stays hand-assigned tags")
+        say("  (§7.3.7), which these searches do not establish either.")
+    return dict(stage1_hits=s1_hits, stage2_hits=s2_hits, unified_hits=uni_hits,
+                joint_hits=joint_hits, seeds=nseeds, n1=n1, n2=n2, nu=nu)
 
 
 if __name__ == "__main__":

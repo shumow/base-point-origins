@@ -35,8 +35,13 @@ D. Limits of this test
 CONCLUSION
   No plain transform of V, no window of H2(V), and no small-counter second
   hash H2(V||i) reproduces the 32-bit high limbs 0x0000003b / 0x0554123b,
-  and no single recipe yields both. The counter-before-second-hash variant
-  is not supported in the digest-input, small-counter regime. With §7.3.8
-  (counter in stage 1) already excluded, the high material still reads as a
-  hand-assigned tag (§7.3.7), not a computed one. Only the seed-input form
-  of stage 2 remains beyond reach.
+  and no single recipe yields both. This is a bounded negative over an
+  explicit domain: 3 V forms, hashes ['sha1', 'md5', 'ripemd160', 'sha256', 'sha1(sha1)', 'sha1(md5)', 'sha0', 'md4', 'ripemd128'], the five
+  placements above, counters below 65536 (fast) / 4096 (slow), and
+  the 32-bit readings listed. It does not cover other transforms, hashes,
+  placements or larger counters. With §7.3.8 (a counter in stage 1,
+  disfavoured on a heuristic, probed over a bounded dictionary) the
+  two-stage digest-input variant is unsupported where tested; the working
+  hypothesis for the high material stays a hand-assigned tag (§7.3.7),
+  which this does not establish. The seed-input form of stage 2 is
+  modelled over candidate seeds in seed_two_stage.py.
