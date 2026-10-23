@@ -1,0 +1,29 @@
+1. the June 2020 grid search sigma^k(2^-j G) + T: recorded minima recomputed
+  ok   sect163k1: at (k=0, j=1) shortest coset x has 126 of 163 bits = 23e21d6019e1211f6bd47ec180256e97  [grid of m^2*h = 53138 points; uniform minimum ~148 bits]  (0.2s)
+  ok   sect233k1: at (k=89, j=45) shortest coset x has 215 of 233 bits = 661f999262551200178956536e047d906dbdee0dec0c7597f53ae3  [grid of m^2*h = 217156 points; uniform minimum ~216 bits]  (0.4s)
+  ok   sect239k1: at (k=56, j=153) shortest coset x has 219 of 239 bits = 4f8c144480033052df685ab429878f71c42aa841ca1519db38298a5  [grid of m^2*h = 228484 points; uniform minimum ~222 bits]  (0.4s)
+  ok   sect283k1: at (k=18, j=13) shortest coset x has 266 of 283 bits = 3750cacdb38706fa100dfa62919bd3015ef8a5ba82051ad7e6701daa609b2c7c677  [grid of m^2*h = 320356 points; uniform minimum ~265 bits]  (0.6s)
+  ok   sect409k1: at (k=134, j=139) shortest coset x has 390 of 409 bits = 20539cf83831d530ea184d469f6879ec06add32aa47c41d834819ff6a4652fa20d4737bd7f31fcdf938e6d79191379833b  [grid of m^2*h = 669124 points; uniform minimum ~390 bits]  (1.4s)
+  ok   sect571k1: at (k=261, j=265) shortest coset x has 549 of 571 bits = 11d12cc87a035e5bd8f908be3c6af41b7fe69e71ca6c914e8570461863aed5e576b863eb535a1b5f30c896c3860efde2fc22310889b06f7398cd263da94b3bda953fda1590  [grid of m^2*h = 1304164 points; uniform minimum ~551 bits]  (2.6s)
+2. the endomorphism hypothesis G = P + sigma(P): x bits of (1 + sigma)^-1 G + T
+  ok   sect163k1: coset x bit lengths [161, 159] of 163; nothing short
+       (1 - sigma)^-1 G + T: [161, 162]
+  ok   sect233k1: coset x bit lengths [232, 233, 233, 232] of 233; nothing short
+       (1 - sigma)^-1 G + T: [232, 225, 231, 233]
+  ok   sect239k1: coset x bit lengths [233, 238, 236, 239] of 239; nothing short
+       (1 - sigma)^-1 G + T: [239, 239, 239, 239]
+  ok   sect283k1: coset x bit lengths [283, 279, 283, 283] of 283; nothing short
+       (1 - sigma)^-1 G + T: [281, 283, 280, 280]
+  ok   sect409k1: coset x bit lengths [409, 409, 409, 404] of 409; nothing short
+       (1 - sigma)^-1 G + T: [407, 409, 409, 408]
+  ok   sect571k1: coset x bit lengths [569, 570, 571, 570] of 571; nothing short
+       (1 - sigma)^-1 G + T: [570, 570, 570, 569]
+3. control: x(G/2) + T on each curve (record 7.1 already has these)
+       sect163k1: [126, 162] of 163
+       sect233k1: [232, 233, 233, 232] of 233
+       sect239k1: [237, 238, 239, 239] of 239
+       sect283k1: [281, 283, 282, 283] of 283
+       sect409k1: [409, 409, 407, 405] of 409
+       sect571k1: [570, 571, 566, 568] of 571
+
+ALL OK

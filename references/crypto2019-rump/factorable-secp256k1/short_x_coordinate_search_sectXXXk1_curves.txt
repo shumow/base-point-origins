@@ -1,0 +1,27 @@
+Searching for short x-coordiantes by checking:
+Multiples of 2^(-j) mod q and iterations of squaring 2^k (frobenius maps.)
+
+sect163k1 searching for short x-coordinates:
+Minimum bit length x coordinate has 126 bits: 0x23e21d6019e1211f6bd47ec180256e97
+Minimum occured at k = 0 j = 1
+
+sect233k1 searching for short x-coordinates:
+Minimum bit length x coordinate has 215 bits: 0x661f999262551200178956536e047d906dbdee0dec0c7597f53ae3
+Minimum occured at k = 89 j = 45
+
+sect239k1 searching for short x-coordinates:
+Minimum bit length x coordinate has 219 bits: 0x4f8c144480033052df685ab429878f71c42aa841ca1519db38298a5
+Minimum occured at k = 56 j = 153
+
+sect283k1 searching for short x-coordinates:
+Minimum bit length x coordinate has 266 bits: 0x3750cacdb38706fa100dfa62919bd3015ef8a5ba82051ad7e6701daa609b2c7c677
+Minimum occured at k = 18 j = 13
+
+sect409k1 searching for short x-coordinates:
+Minimum bit length x coordinate has 390 bits: 0x20539cf83831d530ea184d469f6879ec06add32aa47c41d834819ff6a4652fa20d4737bd7f31fcdf938e6d79191379833b
+Minimum occured at k = 134 j = 139
+
+sect571k1 searching for short x-coordinates:
+Minimum bit length x coordinate has 549 bits: 0x11d12cc87a035e5bd8f908be3c6af41b7fe69e71ca6c914e8570461863aed5e576b863eb535a1b5f30c896c3860efde2fc22310889b06f7398cd263da94b3bda953fda1590
+Minimum occured at k = 261 j = 265
+

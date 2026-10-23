@@ -38,6 +38,7 @@ Everything run so far is negative, and each negative is now backed by a positive
 - The 148-bit core is not the SHA-1 / SHA-0 / RIPEMD-160 (or doubled-hash) digest of any of ~290,000 NIST-era and Certicom-era strings in their case / punctuation / encoding / counter variants — three independent passes, ~70 million evaluations in all. The K-163 value is not the MD5 / MD4 / RIPEMD-128 (or truncated SHA-1) digest of any of them either.
 - The FreeLIP `zrandom` recipe that produced P-192's base point does not produce P-224/256/384/521's or secp160k1's for any seed below 100,000.
 - The 192k1 value is the 224/256k1 value plus `(0x55412 << 168) + 3`; the X9.62 seed-to-field expansion is excluded.
+- On the five larger sect\*k1 curves, Dan's 2020 grid of Frobenius powers × inverse powers of two × cofactor coset (recovered 23 Oct, replicated) finds nothing shorter than uniform, and the generator is not P + σ(P) for any short-x P on any of the six.
 
 The next step is **V1** of [`notes/hash-angle.md`](notes/hash-angle.md): the same search as a GPU dictionary-and-mask attack with hashcat against the 12,288-target list, which reaches candidate spaces (all printable ASCII to length 8, rule-expanded dictionaries) that pure-Python passes cannot. We are experimenting on laptop-class GPUs. **If you have GPU time and would like to run this, we'd be happy to talk** — open an issue or get in touch.
 
