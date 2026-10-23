@@ -1,0 +1,107 @@
+secp*k1 half-generators x(G/2), recomputed from the published G:
+  secp160k1  48ce563f89a0ed9414f5aa28ad0d96d6795f9c62   (159 of 160 bits)
+  secp192k1  554123b78ce563f89a0ed9414f5aa28ad0d96d6795f9c66   (187 of 192 bits)
+  secp224k1  3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63   (166 of 224 bits)
+  secp256k1  3b78ce563f89a0ed9414f5aa28ad0d96d6795f9c63   (166 of 256 bits)
+
+1. Exact structure
+  152-bit core (bits 4..155) identical on all four: True  (8ce563f89a0ed9414f5aa28ad0d96d6795f9c6)
+  top byte of the 160-bit block (bits 152..159): 160k1=0x48, 192k1=0x78, 224k1=0x78, 256k1=0x78
+  material above bit 160:                        160k1=0x0, 192k1=0x554123b, 224k1=0x3b, 256k1=0x3b
+  last nibble (bits 0..3):                       160k1=2, 192k1=6, 224k1=3, 256k1=3
+  normalise top byte->0x78, last nibble->0: all four give the same 160-bit V: True
+      V = 78ce563f89a0ed9414f5aa28ad0d96d6795f9c60
+  => one 160-bit block V shared by all four; 192/224/256 prepend high
+     material, 160k1 instead clears 0x30 from V's top byte. 224k1 and 256k1
+     are byte-for-byte identical (same V, same high 0x3b, same last nibble 3).
+
+2. The ordering obstruction (kills every truncate-one-constant story)
+  secp160k1  field 160 bits, high material  0 bits (0x0)
+  secp192k1  field 192 bits, high material 27 bits (0x554123b)
+  secp224k1  field 224 bits, high material  6 bits (0x3b)
+  secp256k1  field 256 bits, high material  6 bits (0x3b)
+  secp192k1 carries MORE high material (27 bits) than secp224k1/secp256k1
+  (6 bits) over a SMALLER field. So the four are not low windows of one long
+  constant truncated to field size, nor a byte stream read longer for bigger
+  fields. Any generator must explain why the 192-bit curve got the most.
+
+3. FIPS 186 / X9.62 'verifiably random' field-element expansion
+   Expansion of a seed S to a t-bit field element F(S,t):
+     H0 = SHA1(S); W0 = rightmost (t-160*floor((t-1)/160)) bits of H0;
+     Wi = SHA1(S+i); F = W0 || W1 || ... (W0 most significant).
+   Prediction that MATCHES the data: for t in {192,224,256}, s=1, so the
+   low 160 bits of F are W1 = SHA1(S+1) -- a block common to those three,
+   exactly as 192/224/256 share V in their low 160 bits.
+   Prediction that FAILS: the high field is the rightmost h bits of H0=SHA1(S),
+   a full-weight hash slice; observed high material is tiny.
+     secp192k1: h=32 -> expect ~32-bit random high field; observed 0x554123b (27 bits).
+     secp224k1: h=64 -> expect ~64-bit random high field; observed 0x3b (6 bits).
+     secp256k1: h=96 -> expect ~96-bit random high field; observed 0x3b (6 bits).
+   Single-seed contradiction (192 vs 224): a common S would force
+     rightmost 32 bits of H0 = 0x554123b  and
+     rightmost 64 bits of H0 = 0x3b;
+     but rightmost 64 bits already fix rightmost 32 bits = 0x3b != 0x554123b. Contradiction.
+   Weight: a SHA-1 slice equalling a 6-bit value needs ~58 leading zero bits
+   (probability ~2^-58); the high material is not hash output.
+   => X9.62/FIPS expansion is excluded. (Confirms §7.3.2 by a second route;
+      its matching low-160 prediction is why the idea looked plausible.)
+
+4. The secp160k1 top-byte reduction 0x78 -> 0x48
+   0x78 - 0x48 = 0x30;  0x78 ^ 0x48 = 0x30;  0x78 & ~0x30 = 0x48 (clear bits 4,5).
+   0x78-topped value = 78ce563f89a0ed9414f5aa28ad0d96d6795f9c62
+   it is < p(secp160k1): True  (so no reduction mod p forces 0x48)
+   its bit length 159 == 0x48 value's bit length 159: True (so not a bit-length mask either)
+   On-curve lift test on secp160k1 (does the value lift to a point? any point
+   has order n here, h=1, so any lift is a legal x(G/2)):
+     top byte 0x48: low nibbles that lift = [0, 1, 2, 3, 6, 12, 13, 15]  <- includes the published nibble 2
+     top byte 0x78: low nibbles that lift = [0, 1, 3, 4, 5, 6, 8, 9, 10, 11, 14]
+   Reading: both top bytes admit on-curve points, so 0x48 was not forced by
+   lifting. The 0x30 clear is a deliberate 2-bit edit to V's top byte, applied
+   only on the one curve that carries no high material. No field-level cause.
+
+5. Is the high material a counter, date, or function of the curve parameters?
+   values in generation-size order: 160k1->(none), 224k1->0x3b, 256k1->0x3b, 192k1->0x554123b
+   224k1 and 256k1 share the SAME high byte 0x3b (and the same V): reuse, not a
+   per-curve counter. 192k1's 0x554123b ends in 0x3b too, with 0x55412 above it.
+   So 0x3b is a shared constant on three curves; 0x55412 is extra on 192k1 only.
+   Candidate sources for 0x3b = 59 and 0x554123b = 89395771 / 0x55412 = 349202:
+     secp160k1: p mod 2^32=0xffffac73, n mod 2^32=0xca16b6b3, 2^f - p (Mersenne offset)=0x10000538d, p+1-n (trace)=-0x1b8fa16dfab9bca170a3f, b=0x7
+     secp192k1: p mod 2^32=0xffffee37, n mod 2^32=0x74defd8d, 2^f - p (Mersenne offset)=0x1000011c9, b=0x3
+     secp224k1: p mod 2^32=0xffffe56d, n mod 2^32=0x769fb1f7, 2^f - p (Mersenne offset)=0x100001a93, p+1-n (trace)=-0x1dce8d2ec6184caf0a972769fcc89, b=0x5
+     secp256k1: p mod 2^32=0xfffffc2f, n mod 2^32=0xd0364141, 2^f - p (Mersenne offset)=0x1000003d1, b=0x7
+   None of 0x3b, 0x55412, 0x554123b equals any curve's Mersenne offset,
+   low word of p or n, trace, or b (see the table). As a Unix time 0x554123b
+   = 89,395,771 s is ~Mar 1972, not 1997-2000. No counter/date/parameter fit.
+
+6. Is V (or a full value) a hash of the curve's own p or n?
+   3 algorithms x 6 encodings x 4 curves, 160/128-bit windows,
+   top and bottom alignment, matched against V and the full values: 0 hit(s).
+
+7. The 32-bit-word layout, and the 'uninitialised top limb' reading
+   Big-endian 32-bit words (word0 = most significant):
+     secp160k1  48ce563f 89a0ed94 14f5aa28 ad0d96d6 795f9c62
+     secp192k1  0554123b 78ce563f 89a0ed94 14f5aa28 ad0d96d6 795f9c66
+     secp224k1  0000003b 78ce563f 89a0ed94 14f5aa28 ad0d96d6 795f9c63
+     secp256k1  0000003b 78ce563f 89a0ed94 14f5aa28 ad0d96d6 795f9c63
+   The low five words are the block [78ce563f 89a0ed94 14f5aa28 ad0d96d6
+   795f9c6?]; the sixth word is 0x0000003b (224/256), 0x0554123b (192), or
+   absent (160k1, whose top word's high byte is 0x48 not 0x78).
+   If the sixth word were uninitialised buffer or a free-running counter it
+   would differ between runs; instead secp224k1 and secp256k1 carry the
+   identical 0x3b and share it as the low byte of secp192k1's word. A value
+   that repeats across independent curve generations is assigned, not leftover.
+
+SUMMARY
+  * One 160-bit block V = 78ce563f89a0ed9414f5aa28ad0d96d6795f9c6? underlies all
+    four; its middle 152 bits are fixed, its top and bottom nibbles are soft.
+  * secp224k1 and secp256k1 are byte-identical at x(G/2): V, high byte 0x3b,
+    last nibble 3. A chosen x reused verbatim across two fields.
+  * The high material above V is 0x3b on 192/224/256 (0x55412 extra on 192) and
+    absent on 160k1, which instead has 0x30 cleared from V's top byte.
+  * Excluded for the high material: FIPS/X9.62 expansion (single-seed
+    contradiction + weight), field-size truncation (192 > 224/256 in prefix),
+    a per-curve counter (224=256), a date, and a function of p/n/trace/b.
+  * The top-byte 0x30 clear is a deliberate 2-bit edit, not forced by the field.
+  * Bet: the high bytes are small hand-assigned tags written into the top limb
+    of a fixed-width buffer holding V, not a computed quantity. 0x3b (=';'=59)
+    shared by three curves is the single sub-constant most worth identifying.
