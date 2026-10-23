@@ -172,7 +172,7 @@ def main():
                                       if v < (1 << 40)))
     say("   None of 0x3b, 0x55412, 0x554123b equals any curve's Mersenne offset,")
     say("   low word of p or n, trace, or b (see the table). As a Unix time 0x554123b")
-    say("   = 89,395,771 s is ~Mar 1972, not 1997-2000. No counter/date/parameter fit.")
+    say("   = 89,395,771 s is 31 Oct 1972, not 1997-2000. No counter/date/parameter fit.")
     say()
 
     # ---- 6. structured-hash check (seeded from the curve's own numbers) --

@@ -39,7 +39,9 @@ search snippets and must be confirmed against the primary PDFs.*
 | Document | Date | Base-point content / relevance |
 |---|---|---|
 | ANSI X9.62 | 1998 | The curve/base-point **generation method** SEC 1 defers to. Ultimate primary source for the procedure. Paywalled; drafts circulated in IEEE P1363. |
-| **GEC 2: Test Vectors for SEC 1** (Certicom) | reported **v0.3, Sept 1999** | Pre-SEC-2 Certicom doc; uses secp160r1 with ECDSA. **Top target** — if it tabulates secp\*k1 G, it dates them to 1999, a year before SEC 2. A test-vector doc may also show a worked base-point example. |
+| **"Recommended Elliptic Curve Domain Parameters"**, Certicom working draft (probably **GEC 1**) | **1999** (reported) | The title is SEC 2's own; a 1999 draft of the curve tables is the pre-SEC-2 document that would carry the secp\*k1 generators. **Top target.** Surfaced only as a citation (catalog item 6); identity as GEC 1 and its mirror URL to confirm. |
+| **WAP WTLS specification** (WAP-199, `SPEC-WTLS-19991105`) | **1999-11-05** | Its curve appendix gives full parameters, base points included, for curves 1 and 3–12: 3 = sect163k1 (K-163), 10 = sect233k1, 11 = sect233r1, 6 = secp112r1, 12 = secp224r1, 5 = c2pnb163v1, and 7 = a 160-bit SECG r-curve (secp160r2 by OpenSSL's curve table, secp160r1 by std-curves — the PDF decides, see finding 3). Ten months before SEC 2 v1.0, so it dates those generators, including K-163's short half and the secp160r pair of §2.2. |
+| **GEC 2: Test Vectors for SEC 1** (Certicom) | reported **v0.3, Sept 1999** | Pre-SEC-2 Certicom doc; ECDSA test vectors on secp160r1. Worth a look for a worked base-point example, but as a test-vector document it is unlikely to table the k-curve generators. |
 | SEC 1 v1.0 | 2000-09-20 | "Generated verifiably at random using SHA-1 as described in ANSI X9.62" — defers the method to X9.62; does not give the k-curve base-point derivation. |
 | **SEC 2 v1.0** | 2000-09-20 | Earliest public SEC curve tables. States only the **curve** selection for Koblitz curves ("repeatedly selecting parameters admitting an efficiently computable endomorphism until a prime-order curve was found") — **no base-point derivation stated**. |
 | SEC 2 v1.5 | working draft 2005-09-27 | Intermediate; worth diffing for any changed note. |
@@ -58,11 +60,21 @@ search snippets and must be confirmed against the primary PDFs.*
    none cite a derivation. That folk claim is exactly the gap this project is
    filling — worth a line in any write-up.
 3. **The curves travelled under several names**, so drafts may table them under
-   aliases: secp160r1 = `wap-wsg-idm-ecid-wtls7` (WTLS/WAP) = `ansip160r1`
-   (ANSI X9.63). Search WTLS/WAP and X9.63 drafts under the WTLS ids, not "secp".
-4. **SECG was formed by Certicom in 1999**; SEC 1 and SEC 2 are its first two
-   standards (2000). GEC 2 (1999) predates both and is the earliest Certicom
-   parameter/test-vector document surfaced so far.
+   aliases: ANSI X9.63 `ansip*k1` / `ansip160r1` / `ansit*k1`, NIST `K-*`, and the
+   WAP WTLS ids (`wap-wsg-idm-ecid-wtlsN`). Search WTLS/WAP and X9.63 drafts under
+   those ids, not "secp"/"sect". **Caution on wtls7** (corrected 23 Oct): this
+   note first said secp160r1 = wtls7, following std-curves' alias table. OpenSSL's
+   `crypto/ec/ec_curve.c` disagrees: it maps `NID_wap_wsg_idm_ecid_wtls7` to the
+   `_EC_SECG_PRIME_160R2` parameters (p = 2¹⁶⁰ − 2³² − 21389), while std-curves'
+   `wtls/curves.json` gives wtls7 secp160r1's p = 2¹⁶⁰ − 2³¹ − 1 and G. Two
+   catalogs, two answers; the 1999 WTLS PDF settles it, and whoever fetches it
+   should compare curve 7's p and G against both. The undisputed WTLS ids are
+   wtls3 = sect163k1 (K-163), wtls10 = sect233k1, wtls11 = sect233r1, wtls6 =
+   secp112r1, wtls12 = secp224r1, wtls5 = c2pnb163v1; wtls1, 8, 9 are WTLS-only
+   curves (wtls8 and wtls9 have G = (1, …)).
+4. **SECG was formed by Certicom in 1998 or 1999** (sources disagree); SEC 1 and
+   SEC 2 are its first two standards (2000). The 1999 Certicom drafts (GEC 1/GEC 2)
+   and the Nov 1999 WTLS specification predate both.
 
 ## Prioritized target catalog (URLs + reachability)
 
@@ -70,12 +82,14 @@ Priority is by how decisively the source could date the constant or state its
 derivation. "Reachable here" = fetchable from this sandbox (GitHub / package
 registries only); everything else is for a networked session or hand-drop.
 
-1. **GEC 2: Test Vectors for SEC 1, Certicom, v0.3 Sept 1999** — `http://rfc.nop.hu/secg/gec2.pdf` (mirror). Check for any secp\*k1 G table or worked base-point example. *Not reachable here.*
+1. **Certicom's 1999 working draft "Recommended Elliptic Curve Domain Parameters"** — probably GEC 1, in which case the mirror would be `http://rfc.nop.hu/secg/gec1.pdf` next to gec2.pdf; identity to confirm. The pre-SEC-2 curve tables themselves: diff every secp\*k1 and sect\*k1 G against the baseline above. *Not reachable here.*
+1b. **WAP WTLS specification, 5 Nov 1999** — `https://cdimage.debian.org/mirror/archive/ftp.sunet.se/pub/security/docs/PCA/TLS/SPEC-WTLS-19991105.pdf` (Debian archive mirror; also the Open Mobile Alliance's WAP archive as WAP-199-WTLS). Read the curve appendix: compare curve 3 (sect163k1), 10 (sect233k1) and 7 (secp160r1 or r2, finding 3) base points with the baseline; any match dates that generator to 1999, any difference is an earlier form. *Not reachable here (tried 23 Oct: DNS denied).*
+1c. **GEC 2: Test Vectors for SEC 1, Certicom, v0.3 Sept 1999** — `http://rfc.nop.hu/secg/gec2.pdf` (mirror). secp160r1 test vectors; check for a worked base-point example, not expected to table the k-curves. *Not reachable here.*
 2. **ANSI X9.62:1998** base-point generation clause (and its IEEE P1363 draft form). The method SEC 1 defers to; decides whether the k-curves even followed a stated procedure. Paywalled; seek the P1363 working draft. *Not reachable here.*
 3. **Earliest Wayback captures of secg.org** (pre- and circa 2000-09-20): look for a SEC 2 draft < v1.0 or a different G. Recipe: `https://web.archive.org/web/0/http://www.secg.org/` for the earliest capture; CDX `https://web.archive.org/cdx/search/cdx?url=secg.org*&collapse=urlkey&output=text&filter=original:.*[Ss][Ee][Cc]2.*`; append `id_` to a timestamp for the raw PDF. *Wayback is blocked here.*
 4. **SEC 1 v2.0 §"Verifiably Random Curves and Base Point Generators"** — `https://www.secg.org/sec1-v2.pdf` (also mobilefish mirror). Read for any k-curve base-point wording. *Not reachable here.*
 5. **SEC 2 v1.5 working draft (2005-09-27)** — `http://rfc.nop.hu/secg/sec2.pdf` (mirror). Diff notes vs v1.0/v2.0. *Not reachable here.*
-6. **IEEE P1363 working-group archives** (`grouper.ieee.org/groups/1363/`) — a result surfaced `https://grouper.ieee.org/groups/1904/4/email/pdf7kia4jRaeI.pdf` citing "Recommended Elliptic Curve Domain Parameters"; identity/date unconfirmed. *Not reachable here.*
+6. **IEEE P1363 working-group archives** (`grouper.ieee.org/groups/1363/`) — a result surfaced `https://grouper.ieee.org/groups/1904/4/email/pdf7kia4jRaeI.pdf` citing "Recommended Elliptic Curve Domain Parameters"; identity/date unconfirmed — this is the citation behind item 1 and is most likely GEC 1. *Not reachable here.*
 7. **Secondary catalogs for cross-checks** (provenance notes, aliases, not drafts):
    SafeCurves `https://safecurves.cr.yp.to/refs.html`; DiSSECT `https://dissect.crocs.fi.muni.cz/standards/secg`; std-curves `https://std.neuromancer.sk/secg/secp256k1/`. *Not reachable over the web here, but **std-curves is done**: J08nY/std-curves was added (git-readable) and its SECG section vendored at `references/std-curves/secg-curves.json` (commit `77fe6e3`, MIT). `scripts/crosscheck_stdcurves.py` confirms all 26 overlapping curves (10 prime, 6 sect\*k1, 10 NIST binary) agree field-for-field with this repo — 182 fields, 0 mismatches — so the generators under analysis rest on a second independent catalog. See "Cross-check" below.*
 
@@ -93,7 +107,10 @@ prime Koblitz curves carry only `x963/ansip*k1` (ANSI X9.63) — no NIST or WTLS
 alias — while the binary Koblitz curves carry `nist/K-*`, `x963/ansit*k1`, and
 some a WTLS id (sect163k1 = `wtls/wap-wsg-idm-ecid-wtls3`, sect233k1 = `wtls10`).
 So secp256k1 and the other prime k-curves are Certicom/ANSI-X9.63 only, which
-narrows where an early draft of *their* base points could live.
+narrows where an early draft of *their* base points could live. One alias in the
+vendored table is contested: std-curves gives wtls7 to secp160r1, OpenSSL gives
+it secp160r2's parameters (finding 3 above); the parameter cross-check itself is
+unaffected, since it compares SECG entries by SECG name, not by alias.
 
 ## Network constraint (why the fetch step is not done here)
 
@@ -108,9 +125,11 @@ networked session, exactly as the Stevens papers and the rump slides were handle
 
 ## Next actions (for whoever has network)
 
-1. Pull **GEC 2 (Sept 1999)** and grep its parameter tables for the secp\*k1 Gx
-   values above and for `secp*k1`; record whether the base points are present and
-   identical. This is the single most informative fetch.
+1. Pull the **1999 "Recommended Elliptic Curve Domain Parameters" draft (GEC 1?)**
+   and the **Nov 1999 WTLS specification**, and grep their parameter tables for
+   the secp\*k1 / sect\*k1 Gx values above; record whether each base point is
+   present and identical. These are the two most informative fetches; GEC 2 is a
+   distant third.
 2. Pull the **earliest Wayback secg.org** capture and any SEC 2 draft < v1.0; diff
    every secp\*k1 G against the baseline.
 3. Read **SEC 1 v2.0 §"Verifiably Random Curves and Base Point Generators"** and

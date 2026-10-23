@@ -71,7 +71,7 @@ secp*k1 half-generators x(G/2), recomputed from the published G:
      secp256k1: p mod 2^32=0xfffffc2f, n mod 2^32=0xd0364141, 2^f - p (Mersenne offset)=0x1000003d1, b=0x7
    None of 0x3b, 0x55412, 0x554123b equals any curve's Mersenne offset,
    low word of p or n, trace, or b (see the table). As a Unix time 0x554123b
-   = 89,395,771 s is ~Mar 1972, not 1997-2000. No counter/date/parameter fit.
+   = 89,395,771 s is 31 Oct 1972, not 1997-2000. No counter/date/parameter fit.
 
 6. Is V (or a full value) a hash of the curve's own p or n?
    3 algorithms x 6 encodings x 4 curves, 160/128-bit windows,

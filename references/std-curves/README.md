@@ -15,6 +15,11 @@ tables (`scripts/secg_scan.py` CURVES, `data/bincurves.json`,
 the two field-by-field so the generators this project analyses rest on a second
 source, not just transcription. It also carries the curves' aliases (ANSI X9.62/
 X9.63, WTLS/WAP, NIST), useful for the archival pass (`notes/archival.md`).
+One alias is contested: std-curves gives `wap-wsg-idm-ecid-wtls7` to secp160r1
+(and its `wtls/curves.json` carries secp160r1's p and G under that name), while
+OpenSSL's `crypto/ec/ec_curve.c` maps the same NID to secp160r2's parameters.
+The 1999 WTLS specification decides; until then treat the wtls7 alias as unsettled.
+The parameter cross-check compares SECG entries by SECG name, so it is unaffected.
 
 Not redistributed as authoritative: on any disagreement the primary SEC 2 text
 (verified in-repo by n·G = O) governs; the cross-check exists to catch
