@@ -1,0 +1,37 @@
+Stage-2-hashes-the-seed, with candidate seeds (HANDOFF §4.2(b))
+======================================================================
+A seed counts only if it clears BOTH stages. Stage 1 (seed -> V) is the
+§3.2/§4.1 search, already 0 hits over these corpora; it is re-run here
+jointly with stage 2 so no half-match is mistaken for a hit.
+stage-1 hashes: ['sha1', 'sha0', 'ripemd160', 'sha1(sha1)', 'sha1(md5)']   suffixes: 13 (X9.62-style)
+stage-2 hashes: ['sha1', 'md5', 'ripemd160', 'sha1(sha1)']   placements: ['seed||be4', 'seed||be1', 'seed||dec', 'be4||seed']   counters: 0..255   high limbs: ['0x3b', '0x554123b']
+wide hashes (unified): ['sha256', 'sha512', 'sha1||sha1(x||1)']   encodings: ['ascii', 'utf-16-le']
+
+
+candidate seed-encodings: 13910
+stage-1 checks 904,150 -> 0 hit(s)  (expected 0; matches §4.1)
+stage-2 checks 655,216,640 -> 0 high-limb hit(s)
+unified  checks 32,410,300 -> 0 hit(s)
+JOINT (same seed clears both stages): 0 hit(s)
+
+Reading the stage-2 count: the limbs are matched as full 32-bit words,
+0x0000003b (224/256k1, 26 leading zero bits) and 0x0554123b (192k1), each a
+~2^-32 event; 655,216,640 checks give ~0.15 expected spurious per target.
+So stage 2 is itself discriminating here, not a 1-in-64 nibble match, and a
+hit would carry weight -- but it is only evidence on a seed that ALSO clears
+stage 1 (a JOINT hit). A narrower low-6-bit reading of 0x3b was deliberately
+not used: at 1/64 it would carry no information.
+    of 0 stage-2 hits: 0 are 0x0000003b, 0 are 0x0554123b.
+
+CONCLUSION
+  No candidate seed clears both stages, and no seed reproduces a full value
+  as a window of one wide hash. This is a bounded negative over an explicit
+  domain: 13910 seed-encodings (the Certicom wordlist and the curves' p and n,
+  encodings ['ascii', 'utf-16-le']), stage-1 hashes ['sha1', 'sha0', 'ripemd160', 'sha1(sha1)', 'sha1(md5)'] with the X9.62-style
+  suffixes, stage-2 hashes ['sha1', 'md5', 'ripemd160', 'sha1(sha1)'], four placements, counters below
+  256, 32-bit readings, and wide hashes ['sha256', 'sha512', 'sha1||sha1(x||1)']. It says nothing
+  about seeds outside that corpus, other hashes, or larger counters. Stage 1
+  alone is 0 hits here, as in §4.1. Together with §7.3.8 and §7.3.9 the
+  seed-input two-stage construction is unsupported in every domain tested so
+  far; the working hypothesis for the high material stays hand-assigned tags
+  (§7.3.7), which these searches do not establish either.

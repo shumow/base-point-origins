@@ -1,0 +1,20 @@
+DiSSECT multiples_x trait, reimplemented and reconciled with x(G/2)
+======================================================================
+trait: multiple = 1/k mod n; H = multiple*G; report bitlength(x(H)) and
+difference = bitlength(cardinality) - bitlength(x(H)). k=2 is x(G/2).
+
+curve      k=2 x(H) bits  diff    k=2 x(H) == recorded x(G/2)
+secp160k1            159     2                           True
+secp192k1            187     5                           True
+secp224k1            166    59                           True
+secp256k1            166    90                           True
+K-163                126    38                           True
+
+secp256k1, k = 1..10 (the trait's default range), x(1/k * G) bitlength:
+  k=1:255(1)  k=2:166(90)  k=3:255(1)  k=4:256(0)  k=5:256(0)  k=6:256(0)  k=7:255(1)  k=8:253(3)  k=9:256(0)  k=10:256(0)
+  (bits(diff); k=2 is the short one: 166 bits, ~90 short of the 256-bit group.)
+
+RESULT: DiSSECT's multiples_x at k=2 reproduces the recorded x(G/2) on all
+five curves. The CRoCS trait and this repo measure the same quantity; the
+short half-generators are exactly what its 'difference' column flags. DiSSECT
+states no derivation for the base points -- it measures the anomaly, as we do.

@@ -23,23 +23,27 @@ The secp\*k1 observation was first made in the Heninger–Scholl–Shumow Crypto
 | [`notes/plan.md`](notes/plan.md) | the hypotheses and the six-step search plan, with the steps already run marked |
 | [`notes/record.md`](notes/record.md) | the full record of what has been computed so far (small-multiple scans, K-163, the SEC 2 curves) |
 | [`notes/base-point-brief.md`](notes/base-point-brief.md) | the earlier hand-off brief |
-| [`scripts/`](scripts/) | `secg_scan.py` (SEC 2 prime curves), `binpts.py`/`.gp` (NIST binary curves), `k163/` (hash-preimage harness), `secg_core_search.py` (core-matched search) |
+| [`notes/archival.md`](notes/archival.md) | the documentary pass: decision rule, standards timeline, and the prioritized **fetch checklist** with grep targets for dating the constants in a pre-SEC-2 draft |
+| [`scripts/`](scripts/) | `secg_scan.py` (SEC 2 prime curves), `binpts.py`/`.gp` (NIST binary curves), `k163/` (hash-preimage harness), `secg_core_search.py` (core-matched search), the §4.2 high-byte analyses (`high_bytes_analysis.py`, `counter_before_hash.py`, `counter_second_hash.py`, `seed_two_stage.py`), and the independent cross-checks (`crosscheck_stdcurves.py`, `dissect_multiples_x.py`) |
 | [`results/`](results/) | every number behind the statements above |
 | [`tests/`](tests/) | positive controls: every search here must recover a planted or known answer (`python3 -m unittest discover -s tests`) |
 | [`wordlists/`](wordlists/), `scripts/make_targets.py` | the hashcat side of the search: Certicom-era dictionary and the 12,288-target list |
 | [`GPU-Experiments-ToDo.md`](GPU-Experiments-ToDo.md) | outstanding heavy GPU experiments, tooling prerequisites, budgets, and completion criteria |
 | [`references/crypto2019-rump/`](references/crypto2019-rump/) | the 2019–20 Heninger–Scholl–Shumow investigation as recovered from mail: timeline, hypotheses, leads, and what each claim rests on; `scripts/verify_crypto2019.py` and `halve_generators.sage` re-check its numbers |
+| [`references/std-curves/`](references/std-curves/) | the SECG section of J08nY/std-curves, vendored as an independent parameter source for the field-by-field cross-check |
 
-## Status (20 October 2026)
+## Status (23 October 2026)
 
 Everything run so far is negative, and each negative is now backed by a positive control in `tests/`:
 
 - No acceptance rule among ~11,500 tried selects the per-curve last nibbles 2, 6, 3, 3.
-- The 148-bit core is not the SHA-1 / SHA-0 / RIPEMD-160 (or doubled-hash) digest of any of ~290,000 NIST-era and Certicom-era strings in their case / punctuation / encoding / counter variants — three independent passes, ~70 million evaluations in all. The K-163 value is not the MD5 / MD4 / RIPEMD-128 (or truncated SHA-1) digest of any of them either.
+- The 152-bit core is not the SHA-1 / SHA-0 / RIPEMD-160 (or doubled-hash) digest of any of ~290,000 NIST-era and Certicom-era strings in their case / punctuation / encoding / counter variants — three independent passes, ~70 million evaluations in all. The K-163 value is not the MD5 / MD4 / RIPEMD-128 (or truncated SHA-1) digest of any of them either.
 - The FreeLIP `zrandom` recipe that produced P-192's base point does not produce P-224/256/384/521's or secp160k1's for any seed below 100,000.
-- The 192k1 value is the 224/256k1 value plus `(0x55412 << 168) + 3`; the X9.62 seed-to-field expansion is excluded.
+- **The top byte and the 192k1 prefix are characterised** (`notes/record.md` §7.3.7–7.3.10). One 160-bit block *V* = `78ce563f…9c6?` underlies all four secp\*k1 values, with 224k1 and 256k1 byte-identical; the material above *V* (`3b`, `3b`, `0554123b`, none) is small and reused where curves share *V*. Excluded exactly: X9.62 seed-to-field expansion from one seed, and truncation of one long constant to field size. Bounded negatives, each over a stated domain: a free-running per-curve counter and five raw parameter quantities (not arbitrary functions of *p* or *n*); a counter in the hashed input, over the Certicom wordlist; a second hash or transform of the digest, over three *V* forms, nine hashes and counters below 2¹⁶; and a two-stage hash over 13,910 candidate seed-encodings. None of these is a universal exclusion. Working hypothesis: the high bytes are hand-assigned tags.
+- The full 2020 sect\*k1 grid of Frobenius powers × inverse powers of two × cofactor coset was re-run exhaustively: the recorded minima are the **global** minima on all six curves, so K-163 remains the only short binary half; and the generator is not *P* + σ(*P*) for any short-*x* *P* on any of them.
+- The published generators were cross-checked field-for-field against an independent catalog, J08nY/std-curves: 26 curves, 0 mismatches. The CRoCS DiSSECT project's `multiples_x` trait independently measures the same short-half-generator anomaly, and records it without a derivation — as does every public source surveyed.
 
-The next step is **V1** of [`notes/hash-angle.md`](notes/hash-angle.md): the same search as a GPU dictionary-and-mask attack with hashcat against the 12,288-target list, which reaches candidate spaces (all printable ASCII to length 8, rule-expanded dictionaries) that pure-Python passes cannot. We are experimenting on laptop-class GPUs. **If you have GPU time and would like to run this, we'd be happy to talk** — open an issue or get in touch.
+Two tracks are open. **Computational:** **V1** of [`notes/hash-angle.md`](notes/hash-angle.md) — the dictionary-and-mask search as a GPU hashcat job against the 12,288-target list, reaching candidate spaces (all printable ASCII to length 8, rule-expanded dictionaries) that pure-Python passes cannot; we are experimenting on laptop-class GPUs. **Documentary:** the archival pass ([`notes/archival.md`](notes/archival.md)) is set up with a prioritized fetch list and grep targets; the top documents are the 1999 Certicom draft *Recommended Elliptic Curve Domain Parameters* (likely GEC 1) and the 5 November 1999 WAP WTLS specification, either of which would carry the generators a year before SEC 2 v1.0 and date them — or show an earlier form. **If you have GPU time or access to those 1999 documents and would like to help, we'd be happy to talk** — open an issue or get in touch.
 
 ## Running locally on Windows with WSL
 

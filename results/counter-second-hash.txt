@@ -1,0 +1,47 @@
+Counter-before-second-hash model for the secp*k1 high material (§4.2(b))
+========================================================================
+Stage 1 gives the shared V; the counter lives only in stage 2, so V stays
+shared and §7.3.8 does not apply. Stage 2 operates on the digest V (known),
+so the model is testable. Targets (high 32-bit limb above V):
+    0x0000003b  secp224k1/256k1 high limb
+    0x0554123b  secp192k1 high limb
+
+A. Plain transforms of V (no counter): CRC32, Adler32, word sum/xor, slices
+    checked 3 forms x 7 transforms; 0 hit(s) so far.
+
+B. Windows of H2(V) with no counter (is the limb a slice of a re-hash?)
+    324 window checks over 9 hashes; 0 limb hit(s).
+
+C. Counter before the second hash: windows of H2(enc(V, i)), small i,
+   for each V form (the 192k1 limb sits above V(..c66), the 224/256 limb above V(..c63))
+    76,677,120 window checks over 3 V forms (fast hashes to i<65536, slow to i<4096).
+    0x0000003b (secp224k1/256k1 high limb): no small-counter second-hash window produces it.
+    0x0554123b (secp192k1 high limb): no small-counter second-hash window produces it.
+    Joint recipe (one hash+enc+reading yielding both 0x0000003b and 0x0554123b):
+      none: no single second-hash recipe reproduces both limbs at small i.
+
+D. Limits of this test
+    * If stage 2 hashes the SEED (not the digest), its input is unknown and
+      this cannot test it; only the digest-input form is checkable.
+    * The limb is 6 bits (224/256) or 28-32 bits (192). A 6-bit target is
+      met by ~1/64 of counters, so a 0x3b match alone means nothing; a 32-bit
+      match (0x0000003b, 0x0554123b) at a SMALL counter would be meaningful.
+    * A large counter could match any 32-bit target by luck (~1 per 2^32); a
+      bounded sweep tests the small-counter regime a real recipe would use,
+      not impossibility.
+    * Step inversion (scripts/sha1_steps.py) needs a full 160-bit target to
+      run backwards; we observe only a 6-32 bit limb, so it does not apply.
+
+CONCLUSION
+  No plain transform of V, no window of H2(V), and no small-counter second
+  hash H2(V||i) reproduces the 32-bit high limbs 0x0000003b / 0x0554123b,
+  and no single recipe yields both. This is a bounded negative over an
+  explicit domain: 3 V forms, hashes ['sha1', 'md5', 'ripemd160', 'sha256', 'sha1(sha1)', 'sha1(md5)', 'sha0', 'md4', 'ripemd128'], the five
+  placements above, counters below 65536 (fast) / 4096 (slow), and
+  the 32-bit readings listed. It does not cover other transforms, hashes,
+  placements or larger counters. With §7.3.8 (a counter in stage 1,
+  disfavoured on a heuristic, probed over a bounded dictionary) the
+  two-stage digest-input variant is unsupported where tested; the working
+  hypothesis for the high material stays a hand-assigned tag (§7.3.7),
+  which this does not establish. The seed-input form of stage 2 is
+  modelled over candidate seeds in seed_two_stage.py.
