@@ -88,5 +88,34 @@ class ExclusionLogic(unittest.TestCase):
         self.assertGreater(hi["secp192k1"], hi["secp256k1"])
 
 
+class ObservedReductions(unittest.TestCase):
+    def test_planted_nonzero_quotient_is_found(self):
+        value = PUBLISHED["secp256k1"]
+        p = CURVES["secp160k1"]["p"]
+        xs = {"secp256k1": value, "secp160k1": value % p}
+        self.assertIn(dict(source="secp256k1", reading="full", target="secp160k1",
+                           quotient=value // p), hb.observed_reductions(xs))
+        self.assertGreater(value // p, 0)
+
+    def test_low160_reading_is_actually_tested(self):
+        value = PUBLISHED["secp192k1"]
+        low160 = value & ((1 << 160) - 1)
+        xs = {"secp192k1": value, "secp160k1": low160}
+        self.assertIn(dict(source="secp192k1", reading="low160", target="secp160k1",
+                           quotient=0), hb.observed_reductions(xs))
+        self.assertNotIn(dict(source="secp192k1", reading="full", target="secp160k1",
+                              quotient=value // CURVES["secp160k1"]["p"]),
+                         hb.observed_reductions(xs))
+
+    def test_unrelated_values_do_not_match(self):
+        self.assertEqual(hb.observed_reductions({"secp160k1": 0x1234, "secp256k1": 0x9999}), [])
+
+    def test_real_matches_are_only_the_known_identity(self):
+        self.assertEqual(hb.observed_reductions(PUBLISHED), [
+            dict(source="secp224k1", reading="full", target="secp256k1", quotient=0),
+            dict(source="secp256k1", reading="full", target="secp224k1", quotient=0),
+        ])
+
+
 if __name__ == "__main__":
     unittest.main()

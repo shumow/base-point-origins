@@ -1,0 +1,5 @@
+nothing-up-my-sleeve: 20 direct sources, 66 hash candidates; direct 0 hits, secp-core 0 hits, K-163 0 hits; 0 total
+secp-core: 4290 evaluations (5 algorithms x 13 suffix variants); K-163: 594 evaluations (9 algorithms, unsuffixed only)
+actual shared block: 152 bits (4..155); legacy search: broader 148 bits (4..151)
+Direct: hex substrings as-is or hex-character-reversed; no modular reduction or byte reversal.
+Negative result applies only to the frozen corpus and listed encodings and matchers.

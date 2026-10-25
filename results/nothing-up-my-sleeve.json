@@ -1,0 +1,119 @@
+{
+ "experiment": "nothing-up-my-sleeve",
+ "status": "completed",
+ "scope": "frozen corpus and listed encodings only; no universal exclusion of famous-value recipes",
+ "core_scope": "actual shared block: 152 bits (4..155); legacy search: broader 148 bits (4..151)",
+ "corpus_sha256": "7f2d3103c07d1e478210393f12fb8ac9da284c51bf458c039c98908857371e00",
+ "direct_sources": 20,
+ "direct_scope": {
+  "operation": "hex substring search",
+  "readings": [
+   "as-is",
+   "reversed-hex-characters"
+  ],
+  "targets": [
+   "legacy 148-bit secp core",
+   "K-163 128-bit encoding",
+   "secp_core_search.FULL 160-bit forms (including low-160 truncation)"
+  ],
+  "excluded_identity_matches": [
+   "secp_core as-is",
+   "k163_target as-is"
+  ]
+ },
+ "hash_candidates": 66,
+ "core_hash_evaluations": 4290,
+ "k163_hash_evaluations": 594,
+ "evaluation_definition": "one configured algorithm invocation per input and suffix; readings do not add hashes",
+ "direct_hits": [],
+ "core_search": {
+  "status": "completed",
+  "algorithms": [
+   "sha1",
+   "sha0",
+   "ripemd160",
+   "sha1(sha1)",
+   "sha1(md5)"
+  ],
+  "candidate_count": 66,
+  "suffixes_hex": [
+   "",
+   "00",
+   "30",
+   "00000000",
+   "01",
+   "31",
+   "00000001",
+   "02",
+   "32",
+   "00000002",
+   "03",
+   "33",
+   "00000003"
+  ],
+  "readings": [
+   "d",
+   "rev",
+   "wswap"
+  ],
+  "core_hex": "ce563f89a0ed9414f5aa28ad0d96d6795f9c6",
+  "core_bit_range": [
+   4,
+   151
+  ],
+  "evaluations": 4290,
+  "hits": [],
+  "input_sequence_sha256": "5b8e3a940a538987c4431169a15c63a83f63520dbf2e1e53ed9b81dea04b7f8d",
+  "python_version": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+  "openssl_version": "OpenSSL 3.0.20 7 Apr 2026",
+  "reading_definitions": {
+   "d": "digest bytes as-is",
+   "rev": "reverse all bytes",
+   "wswap": "reverse bytes within each 4-byte word"
+  },
+  "full_targets_hex": [
+   "48ce563f89a0ed9414f5aa28ad0d96d6795f9c62",
+   "78ce563f89a0ed9414f5aa28ad0d96d6795f9c63"
+  ]
+ },
+ "k163_search": {
+  "status": "completed",
+  "candidate_count": 66,
+  "algorithms": [
+   "md5",
+   "md4",
+   "sha1",
+   "sha0",
+   "ripemd128",
+   "ripemd160",
+   "md5(md5)",
+   "md5(hex md5)",
+   "sha1(sha1)"
+  ],
+  "suffixes_hex": [
+   ""
+  ],
+  "evaluations": 594,
+  "target_hex": "23e21d6019e1211f6bd47ec180256e97",
+  "reading_definitions": {
+   "d": "digest bytes as-is",
+   "d[:16]": "first 16 bytes when digest is at least 16 bytes",
+   "d[-16:]": "last 16 bytes when digest is at least 16 bytes",
+   "rev": "reverse all digest bytes",
+   "wswap": "reverse bytes within each 4-byte word when length is divisible by 4"
+  },
+  "match_rules": [
+   "exact equality with target in any reading",
+   "low 126 bits equal target in any 16-byte reading",
+   "first 15 bytes equal target prefix in any reading of at least 16 bytes (partial hit)"
+  ],
+  "input_sequence_sha256": "5b8e3a940a538987c4431169a15c63a83f63520dbf2e1e53ed9b81dea04b7f8d",
+  "hits": []
+ },
+ "source_sha256": {
+  "scripts/nothing_up_my_sleeve.py": "f5894e3fdfd46c4a16ab8be21f8a7bc2ac2edf00e3b2e25e03376163ef461fff",
+  "scripts/secg_core_search.py": "cb19f6b6f28adcf9ecd8a85c021ddad36dfad2cdd2bf54a85023f0590a808e47",
+  "scripts/k163/search.py": "c79e6c4807b41cd2d2f27a620ea5bace904e59e3a69ee2c92c7f06831e4e1c56",
+  "scripts/k163/hashes.py": "2ea8fbdb5b03e825b6ae890eb57d02cb961d11df8adb38df2fafdfe12e242f8a"
+ }
+}

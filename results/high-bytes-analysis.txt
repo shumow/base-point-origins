@@ -43,7 +43,7 @@ secp*k1 half-generators x(G/2), recomputed from the published G:
      but rightmost 64 bits already fix rightmost 32 bits = 0x3b != 0x554123b. Contradiction.
    Weight: a SHA-1 slice equalling a 6-bit value needs ~58 leading zero bits
    (probability ~2^-58); the high material is not hash output.
-   => X9.62/FIPS expansion is excluded. (Confirms ยง7.3.2 by a second route;
+   => X9.62/FIPS expansion is excluded. (Confirms ง7.3.2 by a second route;
       its matching low-160 prediction is why the idea looked plausible.)
 
 4. The secp160k1 top-byte reduction 0x78 -> 0x48
@@ -96,6 +96,15 @@ secp*k1 half-generators x(G/2), recomputed from the published G:
    That disfavours leftover or free-running values. It does not exclude a
    counter restarted for each run, or buffer state reused between runs, both
    of which would repeat too; a value assigned by hand is the simplest reading.
+
+8. Observed-coordinate reductions (bounded source set)
+   Sources: each of the four observed full x values and its low 160 bits,
+   reduced modulo each other curve's prime and compared to its full x.
+     {'source': 'secp224k1', 'reading': 'full', 'target': 'secp256k1', 'quotient': 0}
+     {'source': 'secp256k1', 'reading': 'full', 'target': 'secp224k1', 'quotient': 0}
+   Nonzero-quotient matches: 0; quotient-zero matches merely
+   record coordinate identity (224k1 = 256k1). This does not exclude an
+   arbitrary common pre-reduction integer, other counters, or expansion rules.
 
 SUMMARY
   * One 160-bit block V = 78ce563f89a0ed9414f5aa28ad0d96d6795f9c6? underlies all

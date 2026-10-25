@@ -41,6 +41,31 @@ then the two substantial builds (4–5).
 
 ## 1. Nothing-up-my-sleeve / structured non-semantic corpus
 
+**Bounded pass completed (24 Oct 2026), negative.** Selectively integrated from
+`claude/determined-ride-l5ppv0`, with corrected accounting and corpus labels.
+[`nothing_up_my_sleeve.py`](../scripts/nothing_up_my_sleeve.py) freezes 20 direct
+hex sources and 66 hash inputs: fractional digits of seven math constants,
+hash IVs/round constants, selected curve parameters/seeds, targets themselves
+and six markers. Standards values use raw bytes and lower/upper hex ASCII;
+math constants use 40/64 hex characters and 20 raw bytes. No decimal-ASCII
+encoding is included. The MD5 word-order IV and its little-endian-byte form
+are distinct (the branch accidentally duplicated the latter).
+
+Results: [`nothing-up-my-sleeve.json`](../results/nothing-up-my-sleeve.json)
+and [text](../results/nothing-up-my-sleeve.txt). **4,290 secp evaluations**
+(66 inputs × five algorithms × thirteen suffix variants), and **594 K-163
+evaluations** (nine algorithms, **unsuffixed only**); no hits. One evaluation
+means one configured hash-function invocation, not one candidate or reading.
+The manifest retains algorithms, suffixes, readings, input/source checksums
+and target definitions. The secp matcher deliberately uses the broader legacy
+148-bit mask (bits 4–151); the actual common block is 152 bits (bits 4–155).
+Direct coverage is hex-substring search, as-is or with **hex characters**
+reversed, excluding the two as-is self-identities; it does not test modular
+reduction or byte reversal. Controls and exact-count regressions are in
+[`test_nothing_up_my_sleeve.py`](../tests/test_nothing_up_my_sleeve.py).
+This is not all possible famous values or all encodings: the broader proposal
+below remains a source of corpus extensions, not completed coverage.
+
 **What.** Test whether the secp\*k1 core or the K-163 value is the hash, or a
 simple function, of a *famous* value rather than a human sentence: digits of pi
 and e, the SHA-1 and MD5 initialization vectors, other curves' parameters and
@@ -59,6 +84,19 @@ non-semantic. A hit here would essentially be the whole answer.
   running through code that already works and is already benchmarked.
 
 ## 2. Top-byte and expansion stories (analytic)
+
+**Current coverage, not a universal exclusion.** Main already has the
+152-bit structural analysis and the bounded counter/second-hash/two-stage
+models; see [`record.md`](record.md) §7.3.7–7.3.10. The overlapping branch
+`top_byte_analysis.py` and its results were not imported: they used the older
+148-bit decomposition and overstated the exclusions. Its additional observed
+coordinate reduction check is now in
+[`high_bytes_analysis.py`](../scripts/high_bytes_analysis.py) §8, with planted
+controls in [`test_high_bytes.py`](../tests/test_high_bytes.py).
+Only the four observed full x values and their low-160 forms are reduced
+modulo each other curve's prime: no nonzero-quotient match, only the known
+224k1/256k1 identity. This does **not** exclude an arbitrary common
+pre-reduction integer, other counter recipes or expansion schemes.
 
 **What.** The `48` vs `78` disagreement on the 160-bit curve and the shared
 `3b78` on the larger curves are the sharpest structural clues (`plan.md` items

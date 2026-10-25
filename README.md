@@ -43,6 +43,16 @@ Everything run so far is negative, and each negative is now backed by a positive
 - The full 2020 sect\*k1 grid of Frobenius powers × inverse powers of two × cofactor coset was re-run exhaustively: the recorded minima are the **global** minima on all six curves, so K-163 remains the only short binary half; and the generator is not *P* + σ(*P*) for any short-*x* *P* on any of them.
 - The published generators were cross-checked field-for-field against an independent catalog, J08nY/std-curves: 26 curves, 0 mismatches. The CRoCS DiSSECT project's `multiples_x` trait independently measures the same short-half-generator anomaly, and records it without a derivation — as does every public source surveyed.
 
+Update (24 October): a frozen structured-value corpus also gives no hits:
+20 direct hex sources and 66 hash inputs, **4,290 secp-core evaluations** and
+**594 unsuffixed K-163 evaluations**. This deliberately uses the broader
+legacy 148-bit secp mask, not a new 152-bit matcher; direct checks are hex
+substrings, not modular reductions. Separately, reducing the four observed
+half-x values and their low-160 forms modulo the other curves' primes gives
+only the known 224k1/256k1 identity. Neither negative excludes arbitrary
+recipes. See [`notes/experiment-shortlist.md`](notes/experiment-shortlist.md)
+for exact coverage, controls and recorded results.
+
 Two tracks are open. **Computational:** **V1** of [`notes/hash-angle.md`](notes/hash-angle.md) — the dictionary-and-mask search as a GPU hashcat job against the 12,288-target list, reaching candidate spaces (all printable ASCII to length 8, rule-expanded dictionaries) that pure-Python passes cannot; we are experimenting on laptop-class GPUs. **Documentary:** the archival pass ([`notes/archival.md`](notes/archival.md)) is set up with a prioritized fetch list and grep targets; the top documents are the 1999 Certicom draft *Recommended Elliptic Curve Domain Parameters* (likely GEC 1) and the 5 November 1999 WAP WTLS specification, either of which would carry the generators a year before SEC 2 v1.0 and date them — or show an earlier form. **If you have GPU time or access to those 1999 documents and would like to help, we'd be happy to talk** — open an issue or get in touch.
 
 ## Running locally on Windows with WSL

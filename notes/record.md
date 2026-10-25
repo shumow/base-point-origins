@@ -4,6 +4,42 @@
 
 ## Part C. Base-point structure (separate from the skips)
 
+### Integration update (24 October 2026)
+
+Selectively ported the structured-value experiment from
+`claude/determined-ride-l5ppv0` (`9a6095e`), not the branch's older research
+notes or overlapping top-byte script. The corrected run of
+[`nothing_up_my_sleeve.py`](../scripts/nothing_up_my_sleeve.py) records
+20 direct sources, 66 hash inputs, **4,290** secp-core evaluations and
+**594** unsuffixed K-163 evaluations, all without hits
+([manifest](../results/nothing-up-my-sleeve.json),
+[summary](../results/nothing-up-my-sleeve.txt)).
+The branch mislabeled 66 candidates as 66 secp hash evaluations and duplicated
+the little-endian MD5 IV under the word-order label; both are corrected.
+The search deliberately keeps the existing broader 148-bit mask even though
+the actual shared block is 152 bits. Direct checks cover only as-is and
+hex-character-reversed substrings, not byte reversal, complements or modular
+reduction; the precise corpus, encodings and matcher coverage are in
+[`experiment-shortlist.md`](experiment-shortlist.md) §1.
+
+The additional bounded reduction check from the top-byte experiment is now
+§8 of [`high_bytes_analysis.py`](../scripts/high_bytes_analysis.py)
+([regenerated report](../results/high-bytes-analysis.txt)):
+reduce each observed full half-x and its low-160 form modulo each other curve's
+prime, compare to the observed full target. Only the known 224k1/256k1
+identity matches (quotient zero); no nonzero-quotient match.
+This does not exclude an arbitrary common integer before reduction or any
+unexamined counter/expansion construction. Planted reduction and hash controls,
+corpus precision checks, and manifest-count regressions accompany the port.
+
+Validation: the 26 focused tests pass on native Windows Python. The existing
+`python scripts/local.py test` launcher verifies container isolation and runs
+120 tests in restricted local WSL/Docker, with no failures and one skip
+(SageMath is not installed in that image); the PARI check passes. Re-running
+the corpus in the sandbox reproduces all results, coverage metadata and
+checksums from the Windows run; only the recorded Python/OpenSSL versions
+differ. No GPU campaign was launched.
+
 ## 7. Base-point structure
 
 For all ten published prime-field generators (P-192, P-224, P-256, P-384, P-521, prime192v2/v3, prime239v1/v2/v3; parameters verified by n·G = O), computed k·G and (k⁻¹ mod n)·G for 2 ≤ k ≤ 2¹⁶ and recorded the bit length of x and of min(y, p − y) (so negations are covered). Looking for a hash-sized coordinate — 128 bits (MD5) or 160 bits (SHA-1) — or anything else far below the field size:
@@ -103,4 +139,3 @@ With this, both the NIST/NSA-centred and the Certicom-centred dictionaries are e
 **7.3.9 Counter-before-second-hash (the two-stage variant), modelled (23 Oct 2026, §4.2(b)).** `scripts/counter_second_hash.py` → `results/counter-second-hash.txt` (controls `tests/test_counter_second_hash.py`, 4 tests, incl. a planted-counter recovery). This is the branch §7.3.8 does **not** reach: a construction where the low 160 bits are V = H1(seed), counter-free (so V stays shared across curves), and the high limb above V is a second hash or transform of the digest with a per-curve counter — `high = g(H2(V, i))`. Because stage 2 operates on the digest V, which we know, it is directly testable without the seed. Tested, against the 32-bit high limbs 0x0000003b (224/256k1) and 0x0554123b (192k1): (A) plain transforms of V (CRC32, Adler32, word sum/xor, top/low 32) — 0 hits; (B) windows of H2(V) with no counter for nine hashes — 0 limb hits; (C) counter before the second hash, `H2(enc(V, i))` for six fast hashes to i < 2¹⁶ and three pure-Python hashes to i < 2¹², five input placements, fourteen 32-bit window readings, and each of the three V forms (`…9c60`, `…9c63`, `…9c66` — so the 192k1 limb is tested above its own low-160 block; the first run of 23 Oct used `…9c63` only and was widened the same day), **76,677,120 window checks** — no small counter reproduces either limb, and **no single (hash, encoding, reading) yields both**. Limits recorded in the script: a 6-bit target (0x3b) is met by ~1/64 of counters so means nothing alone; a large counter could hit any 32-bit target by luck (~2⁻³²), so the bounded sweep tests the small-counter regime a real recipe would use, not impossibility; other transforms, hashes, placements or larger counters are untested; if stage 2 hashes the **seed** rather than the digest it is modelled over candidate seeds in §7.3.10; and SHA-1 step inversion (`sha1_steps.py`) needs a full 160-bit target, not a 6–32 bit limb, so it does not apply. Net: in the domain tested (three V forms, nine hashes, five placements, the counters and readings above) the two-stage digest-input variant is unsupported; the working hypothesis for the high material stays a hand-assigned tag (§7.3.7), which this does not establish.
 
 **7.3.10 Stage 2 hashing the seed, with candidate seeds (23 Oct 2026, §4.2(b); witnesses and scope revised 23 Oct after review).** `scripts/seed_two_stage.py` → `results/seed-two-stage.txt` (controls `tests/test_seed_two_stage.py`, 6 tests, incl. a planted joint hit driven through the production entry point `main` and recovered as a byte-exact witness). §7.3.9 could not reach the form where stage 2 hashes the unknown *seed* rather than the digest; with candidate seeds it becomes checkable, because a seed must now clear **both** stages — produce V at stage 1 (the §3.2/§4.1 search) *and* a high limb at stage 2 — and a seed clearing only one is not a solution. Every hit is reported with the seed bytes (`input_hex`), the stage-1 hash and suffix, and the stage-2 hash, placement, reading, counter and exact bytes hashed, so a positive would be reproducible from the report alone. Candidate corpus: the Certicom wordlist and the six curves' own p, n (hex and decimal), in ASCII and UTF-16-LE, 13,910 seed-encodings. Three models over them, all negative: **stage 1** (seed → V core, five 160-bit hashes with the X9.62-style suffixes, 904,150 checks) 0 hits, re-confirming §4.1 in the joint harness; **stage 2** (high limb as a full 32-bit word 0x0000003b or 0x0554123b from `H2(seed‖i)`, four placements, counter 0..255, four hashes, twelve window readings, 655,216,640 checks) 0 hits — both limbs are 32-bit targets here (~2⁻³² each, ~0.3 expected spurious total), so the negative is discriminating, not a throwaway 6-bit reading; **unified** (the whole value 0x48ce…/0x3b78…/0x554123b78… as a windowed slice of one wide hash — SHA-256, SHA-512, SHA-1‖SHA-1 — of the seed, every bit offset, 32,410,300 checks) 0 hits; and **joint** (one seed clearing both stages) 0. This is a bounded negative over that corpus, those hashes, placements and counters; it does not exclude the construction for a seed outside the corpus (a long or machine-generated input, or any string not in the wordlist), another hash, or a larger counter. With §7.3.8 and §7.3.9 the counter-before-hash family is unsupported in every domain tested so far, each domain being explicit above. The working hypothesis for the high material stays a hand-assigned tag (§7.3.7), which these searches do not establish.
-

@@ -47,6 +47,20 @@ def is_x(c, x):
     return rhs == 0 or pow(rhs, (c.p - 1) // 2, c.p) == 1
 
 
+def observed_reductions(xs):
+    """Reduce each observed full/low-160 x modulo each other curve's prime."""
+    hits = []
+    for source, x in xs.items():
+        for reading, value in (("full", x), ("low160", x & ((1 << 160) - 1))):
+            for target, want in xs.items():
+                if source == target:
+                    continue
+                p = CURVES[target]["p"]
+                if value % p == want:
+                    hits.append(dict(source=source, reading=reading, target=target, quotient=value // p))
+    return hits
+
+
 def main():
     curves = {n: C(CURVES[n]) for n in K1}
     xs = {n: half_x(curves[n]) for n in K1}
@@ -235,6 +249,18 @@ def main():
     say("   That disfavours leftover or free-running values. It does not exclude a")
     say("   counter restarted for each run, or buffer state reused between runs, both")
     say("   of which would repeat too; a value assigned by hand is the simplest reading.")
+    say()
+
+    say("8. Observed-coordinate reductions (bounded source set)")
+    reductions = observed_reductions(xs)
+    say("   Sources: each of the four observed full x values and its low 160 bits,")
+    say("   reduced modulo each other curve's prime and compared to its full x.")
+    for hit in reductions:
+        say(f"     {hit}")
+    nontrivial = [hit for hit in reductions if hit["quotient"] != 0]
+    say(f"   Nonzero-quotient matches: {len(nontrivial)}; quotient-zero matches merely")
+    say("   record coordinate identity (224k1 = 256k1). This does not exclude an")
+    say("   arbitrary common pre-reduction integer, other counters, or expansion rules.")
     say()
 
     # ---- summary ---------------------------------------------------------
