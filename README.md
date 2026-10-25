@@ -17,6 +17,11 @@ The secp\*k1 observation was first made in the Heninger–Scholl–Shumow Crypto
 
 ## What is here
 
+For human and AI-assisted contributions, start with
+[`CONTRIBUTING.md`](CONTRIBUTING.md). Repository-wide agent guidance is in
+[`AGENTS.md`](AGENTS.md); the current hygiene scope and deferred tooling are in
+[`notes/engineering-plan.md`](notes/engineering-plan.md).
+
 | | |
 |---|---|
 | [`HANDOFF.md`](HANDOFF.md) | **start here** — everything known, everything tried, what to do next |
